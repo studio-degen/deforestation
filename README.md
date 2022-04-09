@@ -1,1 +1,3 @@
 # deforestation game
+
+trees
