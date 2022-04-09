@@ -228,12 +228,33 @@ function allTrees(){
 
 function growApples(){
   if(me.setTree == true && me.apples.length<3){
+    let treeHeight = treeHeightSum(me.branchLength,me.countMax);
+
     me.apples.push({
-      // HW: how do you make sure the apples are only spawning on the endpoints of the branches or something. i just have these set as arbitraty numbers rn
-        x: random(me.x-25,me.x+25),
-        y: random(me.y-me.branchLength, me.y-(me.branchLength*1.75)),
-        move: false,
-        planted: false,
+      y: random(me.y-(me.branchLength/4*3), me.y-treeHeight),
+      move: false,
+      planted: false,
     });
+
+    
+    let appleYTop = me.y-me.branchLength-(me.branchLength/(2**(me.countMax-(me.countMax/3))));
+    for(const a of me.apples){
+      if(a.y > appleYTop){
+        a.x = random(me.x, me.x+25);
+      }else if(a.y<appleYTop){
+        a.x = random(me.x-25,me.x+25);
+      }
+    }
+    // console.log(me.apples);
   }
+}
+
+function treeHeightSum(length, countMax){
+  let sum = length;
+  let temp = length;
+  for(let i = 1; i<countMax; i++){
+    temp/=2;
+    sum += temp;
+  }
+  return sum;
 }
