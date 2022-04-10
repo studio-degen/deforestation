@@ -103,7 +103,7 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation3",
-    "main"
+    "hweng"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
