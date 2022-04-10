@@ -63,8 +63,8 @@ setInterval(() => rushScene(), 30000);
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
-    "studeg_deforestation",
-    "hweng"
+    "studeg_deforestation_2",
+    "hwearng"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -78,7 +78,7 @@ function preload() {
     appleImgs[i - 1] = loadImage("assets/apple" + i + ".png");
   }
 
-  for (let j = 1; j < 5; j++) {
+  for (let j = 1; j < 6; j++) {
     for (let k = 1; k < 2; k++) {
       br1.push(loadImage(`assets/br${1}_${j}_${k}.png`));
       br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
@@ -203,7 +203,7 @@ function mousePressed() {
     }
   }
 }
-function recurTree(x, y, l, a, s) {
+function recurTree(x, y, l, a, s, c) {
   resetMatrix();
   push();
   translate(x, y);
@@ -212,7 +212,7 @@ function recurTree(x, y, l, a, s) {
     let current = s.charAt(i);
     if (current == "F") {
       fill(branchCol);
-      rect(0, 0, 3, -l);
+      rect(0, 0, 5, -l);
       translate(0, -l, 1);
     } else if (current == "X") {
       for (const t of participants) {
@@ -226,7 +226,7 @@ function recurTree(x, y, l, a, s) {
       }
 
       fill(branchCol);
-      rect(0, 0, 3, -l);
+      rect(0, 0, 5, -l);
       translate(0, -l, 1);
     } else if (current == "+") {
       rotate(a);
@@ -268,15 +268,15 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
     }
     s = nextSentence;
     // createP(s);
-    recurTree(x, y, l, a, s);
+    recurTree(x, y, l, a, s, c);
     c++;
   }
 }
 // we need to do the thing where the drawing order is based on y position so the trees at the top are behind the ones towards the bottom
 function allTrees() {
-  console.log(shared.gameStartChk, screenMode, gameScreenMode);
+  //console.log(shared.gameStartChk, screenMode, gameScreenMode);
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
-    console.log(shared.gameStartChk, screenMode, gameScreenMode);
+    //console.log(shared.gameStartChk, screenMode, gameScreenMode);
     background(bgCol);
 
     gameBegin = true;
@@ -468,9 +468,12 @@ function gameTimer() {
   if (gameTime >= 60) {
     if (allOfTheChildTrees.length == 0) {
       gameOver = true;
+
+      screenMode = 5;
+
     }
   }
-  console.log(gameTime, allOfTheTrees.length);
+  //console.log(gameTime, allOfTheTrees.length);
 }
 function growApples() {
   if (me.setTree == true && me.apples.length < 3) {
@@ -509,11 +512,11 @@ function gameState() {
   switch (screenMode) {
     case 0:
       instructionScreen();
-      console.log("instructions");
+      //console.log("instructions");
       break;
     case 1:
       readyScreen();
-      console.log("ready screen");
+      //console.log("ready screen");
       break;
     case 3: //i think this is a bug, it doesn't work if screenmode 2
       launchScreen();
@@ -522,7 +525,7 @@ function gameState() {
       gameScreen(); //this reassigns host if the host exists the game. So the game will continue as long as atleast one player is in the room
       break;
     case 5:
-      winScreen(); //not implemented
+      endScreen(); //not implemented
       break;
   }
 }
@@ -584,6 +587,9 @@ function gameScreen() {
   showButtons();
   screenMode = 4;
   shared.gameStartChk = true; //need to set this on button click
+}
+function endScreen(){
+  background(red);
 }
 function nextFn() {
   instruct++;
