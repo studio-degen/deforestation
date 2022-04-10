@@ -6,36 +6,36 @@ let generateCheck = true;
 let y = 0;
 let treeArea = 150;
 
-bgCol = "#a7d179";
-treeBranch = "#8c5c08";
-treeFoliage = "#088c0f";
-
-setInterval(() => allTrees(), 30);
-
-rules[0] = {
+let bgCol = "#a7d179"; //colours
+let branchCol = "#8c5c08";
+let foliageCol = "#088c0f";
+let appleCol = "red";
+let shadowCol = (rules[0] = {
   X: "X",
   F: "F",
   X1: "F[+X]F[-X]+X",
   X2: "F[+X][-X]FX",
   X3: "F-[[X]+X]+F[+FX]-X",
   F1: "FF",
-};
+});
+
+setInterval(() => allTrees(), 30);
+
 function recurTree(x, y, l, a, s) {
   resetMatrix();
-
   push();
   translate(x, y);
   noStroke();
   for (let i = 0; i < s.length; i++) {
     let current = s.charAt(i);
     if (current == "F") {
-      fill(treeBranch);
+      fill(branchCol);
       rect(0, 0, 3, -l);
       translate(0, -l, 1);
     } else if (current == "X") {
-      fill(treeFoliage);
+      fill(foliageCol);
       ellipse(0, -l, 30);
-      fill(treeBranch);
+      fill(branchCol);
       rect(0, 0, 3, -l);
       translate(0, -l, 1);
     } else if (current == "+") {
@@ -82,7 +82,6 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
     c++;
   }
 }
-
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
@@ -265,7 +264,6 @@ function growApples() {
     // console.log(me.apples);
   }
 }
-
 function treeHeightSum(length, countMax) {
   let sum = length;
   let temp = length;
