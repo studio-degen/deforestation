@@ -4,9 +4,14 @@ let rules = [];
 let shared, me, participants;
 let generateCheck = true;
 let y = 0;
-let treeArea = 150;
+//let treeArea = 150;
 let timer = 500;
 let hostLoggers = [];
+let fol_a = [];
+let fol_b = [];
+let fol_c = [];
+let br1 = [];
+let br2 = [];
 
 const blue = "#25399F"; //COLOURS
 const brown1 = "#584239";
@@ -56,9 +61,18 @@ function recurTree(x, y, l, a, s) {
       rect(0, 0, 3, -l);
       translate(0, -l, 1);
     } else if (current == "X") {
-      fill(green1);
-      ellipse(0, -l, 30);
-      fill(brown1);
+      // console.log(participants[0].folNum);
+      for (const t of participants) {
+        if (t.folNum == 0) {
+          image(fol_a[t.folShape], 0, -l, 30, 30);
+        } else if (t.folNum == 1) {
+          image(fol_b[t.folShape], 0, -l, 30, 30);
+        } else if (t.folNum == 2) {
+          image(fol_c[t.folShape], 0, -l, 30, 30);
+        }
+      }
+
+      fill(branchCol);
       rect(0, 0, 3, -l);
       translate(0, -l, 1);
     } else if (current == "+") {
@@ -114,10 +128,16 @@ function preload() {
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
+
+  for (let i = 1; i < 4; i++) {
+    fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
+    fol_b[i - 1] = loadImage("assets/fol_b_" + i + ".png");
+    fol_c[i - 1] = loadImage("assets/fol_c_" + i + ".png");
+  }
 }
 function setup() {
   createCanvas(1300, 650);
-  // textAlign(CENTER, CENTER);
+  imageMode(CENTER);
 
   background(green4); //BG CONTROL HERE
   noStroke();
@@ -141,6 +161,10 @@ function setup() {
   me.angle = 0;
   me.sentence = 0;
   me.setTree = false;
+  me.treeArea = 150;
+  me.folNum = floor(random(0, 3));
+  me.folShape = floor(random(0, 3));
+
   me.apples = [];
   me.myTrees = [];
 
@@ -179,6 +203,11 @@ function gameState() {
       break;
   }
 }
+
+setInterval(() => allTrees(), 30);
+setInterval(() => addLogger(), 15000);
+setInterval(() => rushScene(), 30000);
+
 function mouseClicked() {
   if (me.setTree == false) {
     me.x = mouseX;
@@ -207,7 +236,7 @@ function mouseClicked() {
       let areaDistY = dist(0, mouseY, 0, me.y);
       if (
         me.apples[i].move == true &&
-        areaDistX <= treeArea / 2 &&
+        areaDistX <= me.treeArea / 2 &&
         areaDistY <= me.branchLength / 2
       ) {
         me.apples[i].move = false;
@@ -227,7 +256,7 @@ function mouseClicked() {
 
         // adding apples back at a slower pace?
         //this runs as soon as the mouse is clicked and then creates the delay instead of delaying first and then creating an apple
-        setTimeout(growApples(), 5000);
+        //setTimeout(growApples(), 5000);
       }
     }
   }
@@ -238,7 +267,7 @@ function allTrees() {
   if (me.setTree == false) {
     push();
     fill(255, 255, 255, 150);
-    ellipse(mouseX, mouseY, treeArea, treeArea / 2);
+    ellipse(mouseX, mouseY, me.treeArea, me.treeArea / 2);
     fill("red");
     ellipse(mouseX, mouseY, 20);
     pop();
@@ -250,7 +279,7 @@ function allTrees() {
       // draw the area
       push();
       fill(255, 255, 255, 100);
-      ellipse(t.x, t.y, treeArea, t.branchLength);
+      ellipse(t.x, t.y, me.treeArea, t.branchLength);
       pop();
 
       // draw the main tree per participant
@@ -400,6 +429,12 @@ function allTrees() {
       circle(logger.x, logger.y + 10, 10);
     }
   });
+
+  //console.log((floor(int(millis())/1000)/10) % 1 == 0);
+  let randint = random();
+  if (randint < 0.001) {
+    setTimeout(growApples(), 3000);
+  }
 }
 function addLogger() {
   if (partyIsHost()) {
@@ -412,12 +447,15 @@ function addLogger() {
     );
   }
 }
-function rushLoggers() {
+
+function rushScene() {
   if (partyIsHost()) {
     hostLoggers.forEach((logger) => {
-      logger.step += 6;
+      logger.step += 10;
     });
   }
+
+  me.treeArea += 50;
 }
 function growApples() {
   if (me.setTree == true && me.apples.length < 3) {
