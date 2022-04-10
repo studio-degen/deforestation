@@ -1,4 +1,3 @@
-// hyacinth's original code is in hweng_old.js
 let axiom = "X"; //starting point
 let treeGrowInterval=1000;
 let rules = [];
@@ -6,6 +5,11 @@ let shared, me, participants;
 let generateCheck=true;
 let y=0;
 let treeArea = 150;
+let fol_a = [];
+let fol_b = [];
+let fol_c = [];
+let br1 = [];
+let br2 = [];
 
 rules[0] = {
   Xa: "X",
@@ -30,11 +34,21 @@ function preload(){
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
+
+  for(let i=1; i<4; i++){
+    fol_a[i-1] = loadImage('assets/fol_a_'+i+'.png');
+    fol_b[i-1] = loadImage('assets/fol_b_'+i+'.png');
+    fol_c[i-1] = loadImage('assets/fol_c_'+i+'.png');
+  }
+  // for(let i=1; i<2; i++){
+
+  // }
 }
 
 function setup(){
   createCanvas(600, 600);
   textAlign(CENTER, CENTER);
+  imageMode(CENTER);
 
   background(bgCol); //BG CONTROL HERE
   noStroke();
@@ -46,6 +60,8 @@ function setup(){
   me.angle=0;
   me.sentence=0;
   me.setTree= false;
+  me.folNum = floor(random(0,3));
+  me.folShape = floor(random(0,3));
 
   me.apples = [];
   me.myTrees = [];
@@ -63,8 +79,19 @@ function recurTree(x,y,l,a,s){
       rect(0, 0, 3, -l);
       translate(0, -l,1);
     }else if (current == "X"){
-      fill(treeFoliage);
-      ellipse(0,-l, 30);
+      // fill(treeFoliage);
+      // ellipse(0,-l, 30);
+      console.log(participants[0].folNum);
+      for(const t of participants){
+        if(t.folNum == 0){
+          image(fol_a[t.folShape], 0,-l, 30,30);
+        }else if(t.folNum == 1){
+          image(fol_b[t.folShape], 0,-l, 30,30);
+        }else if(t.folNum == 2){
+          image(fol_c[t.folShape], 0,-l, 30,30);
+        }
+      }
+      
       fill(treeBranch);
       rect(0, 0, 3, -l);
       translate(0, -l,1);
