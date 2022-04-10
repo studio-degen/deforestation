@@ -280,6 +280,8 @@ function allTrees() {
     background(bgCol);
 
     gameBegin = true;
+    text(gameTime, width-200, 100)
+    text(allOfTheChildTrees.length, width-200, 140);
 
     if (me.state == "viewer") {
       push();
@@ -569,6 +571,7 @@ function readyScreen() {
     text("game is already in session. Join as viewer", 20, 30);
     me.state = "viewer";
   }
+
 }
 function launchScreen() {
   showButtons();
@@ -578,6 +581,9 @@ function launchScreen() {
       text("click to launch game", 20, 30);
     } else {
       text("waiting for host to launch game", 20, 30);
+    }
+    for (let i = 0; i < participants.length; i++) {
+      image(appleImgs[me.appleShape], (width/2-(participants.length/2)*100) + 100*i, height/2, 50, 50);
     }
   } else {
     screenMode = 4;
