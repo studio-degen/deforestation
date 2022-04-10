@@ -8,10 +8,28 @@ let treeArea = 150;
 let timer = 500;
 let hostLoggers = [];
 
-let bgCol = "#a7d179"; //colours
-let branchCol = "#8c5c08";
-let foliageCol = "#088c0f";
-let appleCol = "red";
+const blue = "#25399F"; //COLOURS
+const brown1 = "#584239";
+const brown2 = "#6C523B";
+const green1 = "#2B734E";
+const green2 = "#27AB5E";
+const green3 = "#1CDC5F";
+const green4 = "#76E44E";
+const red = "#F14037";
+const yellow = "#FFDD00";
+const pink = "#F0909C";
+
+let screenMode = 0; //waiting room variables
+let instruct = 0;
+let lastPage = 5; //count of numer of instruction pages
+let nextButton;
+let nextButtonX = 150;
+let prevButton;
+let prevButtonX = 150;
+let finButton;
+let finButtonX = 150;
+let finButtonTxt = "START GAME"; //not implemented yet / might remove
+
 let shadowCol = (rules[0] = {
   X: "X",
   F: "F",
@@ -21,7 +39,10 @@ let shadowCol = (rules[0] = {
   F1: "FF",
 });
 
-setInterval(() => allTrees(), 30);
+// setInterval(() => allTrees(), 30);
+// setInterval(() => addLogger(), 30000);
+// setInterval(() => rushLoggers(), 90000);
+setInterval(() => gameState(), 30);
 
 function recurTree(x, y, l, a, s) {
   resetMatrix();
@@ -31,13 +52,13 @@ function recurTree(x, y, l, a, s) {
   for (let i = 0; i < s.length; i++) {
     let current = s.charAt(i);
     if (current == "F") {
-      fill(branchCol);
+      fill(brown1);
       rect(0, 0, 3, -l);
       translate(0, -l, 1);
     } else if (current == "X") {
-      fill(foliageCol);
+      fill(green1);
       ellipse(0, -l, 30);
-      fill(branchCol);
+      fill(brown1);
       rect(0, 0, 3, -l);
       translate(0, -l, 1);
     } else if (current == "+") {
@@ -53,7 +74,6 @@ function recurTree(x, y, l, a, s) {
   translate(0, 0);
   pop();
 }
-
 function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
   //console.log(x, y, c, cmax, l, a, s, ls);
   while (c < cmax) {
@@ -88,20 +108,31 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
-    "studeg_deforestation2",
+    "studeg_tmtest__deforestation2",
     "main"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
 }
-
 function setup() {
   createCanvas(1300, 650);
-  textAlign(CENTER, CENTER);
+  // textAlign(CENTER, CENTER);
 
-  background(bgCol); //BG CONTROL HERE
+  background(green4); //BG CONTROL HERE
   noStroke();
+  nextButton = createButton("NEXT");
+  nextButton.position(width - nextButtonX, height);
+  nextButton.mousePressed(nextFn);
+
+  prevButton = createButton("PREVIOUS");
+  prevButton.position(prevButtonX, height);
+  prevButton.mousePressed(prevFn);
+
+  finButton = createButton(finButtonTxt);
+  finButton.position(prevButtonX, height);
+  finButton.mousePressed(finFn);
+
   me.x = 0;
   me.y = 0;
   me.count = 0;
@@ -110,10 +141,11 @@ function setup() {
   me.angle = 0;
   me.sentence = 0;
   me.setTree = false;
-
   me.apples = [];
   me.myTrees = [];
+
   shared.loggers = [];
+
   if (partyIsHost()) {
     hostLoggers.push(
       new Logger(
@@ -122,13 +154,31 @@ function setup() {
         6
       )
     );
+    shared.gameStartChk = false;
+    instruct = 0;
   }
 }
-
-setInterval(() => allTrees(), 30);
-setInterval(() => addLogger(), 30000);
-setInterval(() => rushLoggers(), 90000);
-
+function gameState() {
+  switch (screenMode) {
+    case 0:
+      instructionScreen();
+      console.log("instructions");
+      break;
+    case 1:
+      readyScreen();
+      console.log("ready screen");
+      break;
+    case 3: //i think this is a bug, it doesn't work if screenmode 2
+      launchScreen();
+      break;
+    case 4:
+      gameScreen(); //this reassigns host if the host exists the game. So the game will continue as long as atleast one player is in the room
+      break;
+    case 5:
+      winScreen(); //not implemented
+      break;
+  }
+}
 function mouseClicked() {
   if (me.setTree == false) {
     me.x = mouseX;
@@ -184,7 +234,7 @@ function mouseClicked() {
 }
 // we need to do the thing where the drawing order is based on y position so the trees at the top are behind the ones towards the bottom
 function allTrees() {
-  background(bgCol);
+  background(green4);
   if (me.setTree == false) {
     push();
     fill(255, 255, 255, 150);
@@ -351,7 +401,6 @@ function allTrees() {
     }
   });
 }
-
 function addLogger() {
   if (partyIsHost()) {
     hostLoggers.push(
@@ -363,7 +412,6 @@ function addLogger() {
     );
   }
 }
-
 function rushLoggers() {
   if (partyIsHost()) {
     hostLoggers.forEach((logger) => {
@@ -371,7 +419,6 @@ function rushLoggers() {
     });
   }
 }
-
 function growApples() {
   if (me.setTree == true && me.apples.length < 3) {
     let treeHeight = treeHeightSum(me.branchLength, me.countMax);
@@ -404,4 +451,127 @@ function treeHeightSum(length, countMax) {
     sum += temp;
   }
   return sum;
+}
+
+//PRE GAME STUFF
+function instructionScreen() {
+  background(green4);
+  switch (instruct) {
+    case 0:
+      showButtons();
+      textSize(32);
+      text("Page 1", 10, 30);
+      break;
+    case 1:
+      showButtons();
+      text("Page 2", 10, 30);
+      break;
+    case 2:
+      showButtons();
+      text("Page 3", 10, 30);
+      break;
+    case 3:
+      showButtons();
+      text("Page 4", 10, 30);
+      break;
+    case 4:
+      showButtons();
+      text("Page 5", 10, 30);
+      break;
+    case 5:
+      showButtons();
+      text("Page 6", 10, 30);
+      break;
+  }
+}
+function readyScreen() {
+  showButtons();
+  background(green3);
+  if (shared.gameStartChk == false) {
+    text("ready to play?", 20, 30);
+    me.state = "player";
+  } else {
+    text("game is already in session. Join as viewer", 20, 30);
+    me.state = "viewer";
+  }
+}
+function launchScreen() {
+  showButtons();
+  background(green1);
+  if (shared.gameStartChk == false) {
+    if (partyIsHost()) {
+      text("click to launch game", 20, 30);
+    } else {
+      text("waiting for host to launch game", 20, 30);
+    }
+  } else {
+    screenMode = 4;
+  }
+}
+function gameScreen() {
+  showButtons();
+  background(green2);
+  shared.gameStartChk = true; //need to set this on button click
+  if (shared.gameStartChk) {
+    if (me.state == "player") {
+      push();
+      fill(red);
+      noStroke();
+      ellipse(mouseX, mouseY, 10, 10);
+      pop();
+    } else {
+      console.log("you're just a viewer");
+    }
+  }
+  // if(win==true) { //psuedo win fn call code
+  //   screenMode = 5;
+  // }
+}
+function mouseClicked() {
+  if (screenMode < 4 && screenMode > 1) screenMode++;
+}
+function nextFn() {
+  instruct++;
+}
+function prevFn() {
+  instruct--;
+}
+function finFn() {
+  screenMode++;
+  console.log(screenMode);
+}
+function showButtons() {
+  if (screenMode == 0) {
+    if (instruct == 0) {
+      prevButton.hide();
+      nextButton.show();
+      finButton.show();
+      finButton.position(finButtonX, height);
+    } else if (instruct == lastPage) {
+      prevButton.show();
+      nextButton.hide();
+      finButton.show();
+      finButton.position(width - finButtonX, height);
+    } else {
+      prevButton.show();
+      nextButton.show();
+      finButton.hide();
+    }
+  } else if (screenMode == 1) {
+    prevButton.hide();
+    nextButton.hide();
+    finButton.show();
+  } else if (screenMode == 3 && partyIsHost()) {
+    prevButton.hide();
+    nextButton.hide();
+    finButton.show();
+  } else if (screenMode > 3) {
+    prevButton.hide();
+    nextButton.hide();
+    finButton.hide();
+  } else {
+    prevButton.hide();
+    nextButton.hide();
+    finButton.hide();
+  }
 }
