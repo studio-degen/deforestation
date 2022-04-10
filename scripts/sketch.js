@@ -12,6 +12,7 @@ let fol_c = [];
 let br1 = [];
 let br2 = [];
 let appleImgs = [];
+let axeGif,woodGif;
 let allOfTheTrees = [];
 let allOfTheChildTrees = [];
 let gameTime = 0;
@@ -130,7 +131,7 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation",
-    "ar"
+    "hweng"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -150,6 +151,9 @@ function preload() {
       br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
     }
   }
+
+  axeGif = loadImage('assets/logger_axe.gif');
+  woodGif = loadImage('assets/logger_wood.gif');
 }
 
 function setup() {
@@ -212,7 +216,7 @@ function setup() {
   }
 }
 
-setInterval(() => gameState(), 30);
+// setInterval(() => gameState(), 30);
 setInterval(() => allTrees(), 30);
 setInterval(() => gameTimer(), 1000);
 setInterval(() => addLogger(), 15000);
@@ -425,13 +429,9 @@ function allTrees() {
 
   shared.loggers.forEach((logger) => {
     if (!logger.woodpicked) {
-      fill(0);
-      circle(logger.x, logger.y, 10);
+      image(axeGif, logger.x,logger.y,25,25);
     } else {
-      fill(0);
-      circle(logger.x, logger.y, 10);
-      fill("#795548");
-      circle(logger.x, logger.y + 10, 10);
+      image(woodGif, logger.x,logger.y,25,25);
     }
   });
 
