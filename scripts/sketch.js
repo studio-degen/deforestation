@@ -4,7 +4,6 @@ let rules = [];
 let shared, me, participants;
 let generateCheck = true;
 let y = 0;
-//let treeArea = 150;
 let timer = 500;
 let hostLoggers = [];
 let fol_a = [];
@@ -12,6 +11,7 @@ let fol_b = [];
 let fol_c = [];
 let br1 = [];
 let br2 = [];
+let appleImgs = [];
 
 let bgCol = "#a7d179"; //colours
 let branchCol = "#8c5c08";
@@ -40,7 +40,6 @@ function recurTree(x, y, l, a, s) {
       rect(0, 0, 3, -l);
       translate(0, -l,1);
     }else if (current == "X"){
-      // console.log(participants[0].folNum);
       for(const t of participants){
         if(t.folNum == 0){
           image(fol_a[t.folShape], 0,-l, 30,30);
@@ -102,7 +101,7 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
-    "studeg_deforestation3",
+    "studeg_deforestation",
     "hweng"
   );
   shared = partyLoadShared("globals");
@@ -113,6 +112,15 @@ function preload() {
     fol_a[i-1] = loadImage('assets/fol_a_'+i+'.png');
     fol_b[i-1] = loadImage('assets/fol_b_'+i+'.png');
     fol_c[i-1] = loadImage('assets/fol_c_'+i+'.png');
+
+    appleImgs[i-1] = loadImage('assets/apple'+i+'.png');
+  }
+
+  for(let j=1; j<5; j++){
+    for(let k=1; k<2; k++){
+      br1.push(loadImage(`assets/br${1}_${j}_${k}.png`));
+      br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
+    }
   }
 }
 
@@ -134,6 +142,16 @@ function setup() {
   me.treeArea = 150;
   me.folNum = floor(random(0,3));
   me.folShape = floor(random(0,3));
+  me.appleShape = floor(random(0,3));
+  me.branchCol = floor(random(0,2));
+  me.branchShape = {
+    a: floor(random(0,2)),
+    b: floor(random(2,4)),
+    c: floor(random(4,6)),
+    d: floor(random(6,8)),
+    e: floor(random(8,10)),
+  }
+  //a is the biggest/lowest level branch
 
   me.apples = [];
   me.myTrees = [];
@@ -210,15 +228,14 @@ function mouseClicked() {
 function allTrees() {
   background(bgCol);
   if (me.setTree == false) {
+    //draw initial planting area
     push();
     fill(255, 255, 255, 150);
     ellipse(mouseX, mouseY, me.treeArea, me.treeArea / 2);
-    fill("red");
-    ellipse(mouseX, mouseY, 20);
+    image(appleImgs[me.appleShape],mouseX,mouseY,12,12);
     pop();
   }
 
-  // growApples();
   for (const t of participants) {
     if (t.setTree == true) {
       // draw the area
@@ -226,7 +243,7 @@ function allTrees() {
       fill(255, 255, 255, 100);
       ellipse(t.x, t.y, me.treeArea, t.branchLength);
       pop();
-
+      
       // draw the main tree per participant
       generateNewSentence(
         t.x,
@@ -240,21 +257,15 @@ function allTrees() {
       );
 
       //draw the apples
-      // the apples should not be blinking, but only your own seem to do that
       for (const a of t.apples) {
         if (a.move == true) {
           a.x = mouseX;
           a.y = mouseY;
         }
-        push();
-        fill(255, 0, 0);
-        ellipse(a.x, a.y, 10, 10);
-        pop();
+        image(appleImgs[t.appleShape],a.x,a.y,12,12);
       }
       for (const m of t.myTrees) {
         push();
-        // fill(0, 255, 0);
-        // rect(m.x, m.y, 10, 20);
         generateNewSentence(
           m.x,
           m.y,
@@ -278,7 +289,7 @@ function allTrees() {
       noFill();
       stroke(255, 230, 5);
       strokeWeight(3);
-      ellipse(a.x, a.y, 13);
+      ellipse(a.x, a.y, 17);
       pop();
     }
   }
