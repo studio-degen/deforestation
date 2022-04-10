@@ -4,7 +4,6 @@ let rules = [];
 let shared, me, participants;
 let generateCheck = true;
 let y = 0;
-//let treeArea = 150;
 let timer = 500;
 let hostLoggers = [];
 let fol_a = [];
@@ -12,6 +11,7 @@ let fol_b = [];
 let fol_c = [];
 let br1 = [];
 let br2 = [];
+let appleImgs = [];
 
 const blue = "#25399F"; //COLOURS
 const brown1 = "#584239";
@@ -56,7 +56,6 @@ function recurTree(x, y, l, a, s) {
       rect(0, 0, 3, -l);
       translate(0, -l, 1);
     } else if (current == "X") {
-      // console.log(participants[0].folNum);
       for (const t of participants) {
         if (t.folNum == 0) {
           image(fol_a[t.folShape], 0, -l, 30, 30);
@@ -132,6 +131,15 @@ function preload() {
     fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
     fol_b[i - 1] = loadImage("assets/fol_b_" + i + ".png");
     fol_c[i - 1] = loadImage("assets/fol_c_" + i + ".png");
+
+    appleImgs[i - 1] = loadImage("assets/apple" + i + ".png");
+  }
+
+  for (let j = 1; j < 5; j++) {
+    for (let k = 1; k < 2; k++) {
+      br1.push(loadImage(`assets/br${1}_${j}_${k}.png`));
+      br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
+    }
   }
 }
 function setup() {
@@ -170,6 +178,16 @@ function setup() {
   me.treeArea = 150;
   me.folNum = floor(random(0, 3));
   me.folShape = floor(random(0, 3));
+  me.appleShape = floor(random(0, 3));
+  me.branchCol = floor(random(0, 2));
+  me.branchShape = {
+    a: floor(random(0, 2)),
+    b: floor(random(2, 4)),
+    c: floor(random(4, 6)),
+    d: floor(random(6, 8)),
+    e: floor(random(8, 10)),
+  };
+  //a is the biggest/lowest level branch
 
   me.apples = [];
   me.myTrees = [];
@@ -318,107 +336,115 @@ function allTrees() {
         noFill();
         stroke(255, 230, 5);
         strokeWeight(3);
-        ellipse(a.x, a.y, 13);
+        ellipse(a.x, a.y, 17);
         pop();
       }
-    }
 
-    if (partyIsHost()) {
-      shared.loggers = [];
-      hostLoggers.forEach((logger) => {
-        logger.move();
-        //logger.show();
+      if (partyIsHost()) {
+        shared.loggers = [];
+        hostLoggers.forEach((logger) => {
+          logger.move();
+          //logger.show();
 
-        participants.forEach((p) => {
-          if (!logger.woodpicked) {
-            //console.log(p.myTrees);
+          participants.forEach((p) => {
+            if (!logger.woodpicked) {
+              //console.log(p.myTrees);
 
-            // let partreeDist = dist(logger.pos.x, logger.pos.y, p.x, p.y);
-            // if(partreeDist < 30) {
-            //   //console.log('close');
-            //   logger.cutting = true;
-            //   if(partreeDist > 5) {
-            //     logger.d.x = lerp(logger.d.x, (p.x-logger.pos.x)/20, 0.2);
-            //     logger.d.y = lerp(logger.d.y, (p.y-logger.pos.y)/20, 0.2);
-            //   }else if(partreeDist < 5){
-            //     console.log('hit');
-            //     if(int(millis())/1000 % 60){
-            //       logger.cutTime--;
-            //     }
+              // let partreeDist = dist(logger.pos.x, logger.pos.y, p.x, p.y);
+              // if(partreeDist < 30) {
+              //   //console.log('close');
+              //   logger.cutting = true;
+              //   if(partreeDist > 5) {
+              //     logger.d.x = lerp(logger.d.x, (p.x-logger.pos.x)/20, 0.2);
+              //     logger.d.y = lerp(logger.d.y, (p.y-logger.pos.y)/20, 0.2);
+              //   }else if(partreeDist < 5){
+              //     console.log('hit');
+              //     if(int(millis())/1000 % 60){
+              //       logger.cutTime--;
+              //     }
 
-            //     if(logger.cutTime == 0){
-            //       logger.d.x = 0;
-            //       logger.d.y = 0;
-            //       p.x = null;
-            //       p.y = null;
-            //       //console.log(p.myTrees)
-            //       logger.woodpicked = true;
-            //     }
-            //     setTimeout(()=>{
-            //       logger.cutting = false;
-            //       logger.cutTime = 10;
-            //     }, 2000);
+              //     if(logger.cutTime == 0){
+              //       logger.d.x = 0;
+              //       logger.d.y = 0;
+              //       p.x = null;
+              //       p.y = null;
+              //       //console.log(p.myTrees)
+              //       logger.woodpicked = true;
+              //     }
+              //     setTimeout(()=>{
+              //       logger.cutting = false;
+              //       logger.cutTime = 10;
+              //     }, 2000);
 
-            //   }
+              //   }
 
-            // }
+              // }
 
-            let treeDist;
-            p.myTrees.forEach((t, index) => {
-              treeDist = dist(logger.pos.x, logger.pos.y, t.x, t.y);
-              if (treeDist < 30) {
-                //console.log('close');
-                logger.cutting = true;
-                if (treeDist > 10) {
-                  logger.d.x = lerp(logger.d.x, (t.x - logger.pos.x) / 20, 0.2);
-                  logger.d.y = lerp(logger.d.y, (t.y - logger.pos.y) / 20, 0.2);
-                } else if (treeDist < 10) {
-                  //console.log('hit');
-                  // if(int(millis())/1000 % 60){
-                  //   logger.cutTime--;
-                  // }
+              let treeDist;
+              p.myTrees.forEach((t, index) => {
+                treeDist = dist(logger.pos.x, logger.pos.y, t.x, t.y);
+                if (treeDist < 30) {
+                  //console.log('close');
+                  logger.cutting = true;
+                  if (treeDist > 10) {
+                    logger.d.x = lerp(
+                      logger.d.x,
+                      (t.x - logger.pos.x) / 20,
+                      0.2
+                    );
+                    logger.d.y = lerp(
+                      logger.d.y,
+                      (t.y - logger.pos.y) / 20,
+                      0.2
+                    );
+                  } else if (treeDist < 10) {
+                    //console.log('hit');
+                    // if(int(millis())/1000 % 60){
+                    //   logger.cutTime--;
+                    // }
 
-                  //if(logger.cutTime == 0){
-                  //logger.d.x = 0;
-                  //logger.d.y = 0;
-                  p.myTrees.splice(index, 1);
-                  //console.log(p.myTrees)
-                  logger.woodpicked = true;
-                  //}
-                  setTimeout(() => {
-                    logger.cutting = false;
-                    //logger.cutTime = 10;
-                  }, 2000);
+                    //if(logger.cutTime == 0){
+                    //logger.d.x = 0;
+                    //logger.d.y = 0;
+                    p.myTrees.splice(index, 1);
+                    //console.log(p.myTrees)
+                    logger.woodpicked = true;
+                    //}
+                    setTimeout(() => {
+                      logger.cutting = false;
+                      //logger.cutTime = 10;
+                    }, 2000);
+                  }
                 }
-              }
-            });
-          }
-        });
+              });
+            }
+          });
 
-        shared.loggers.push({
-          x: logger.pos.x,
-          y: logger.pos.y,
-          woodpicked: logger.woodpicked,
+          shared.loggers.push({
+            x: logger.pos.x,
+            y: logger.pos.y,
+            woodpicked: logger.woodpicked,
+          });
         });
-      });
-    }
-
-    shared.loggers.forEach((logger) => {
-      if (!logger.woodpicked) {
-        fill(0);
-        circle(logger.x, logger.y, 10);
-      } else {
-        fill(0);
-        circle(logger.x, logger.y, 10);
-        fill("#795548");
-        circle(logger.x, logger.y + 10, 10);
       }
-    });
 
-    //console.log((floor(int(millis())/1000)/10) % 1 == 0);
-    let randint = random();
-    if (randint < 0.001) {
-      setTimeout(growApples(), 3000);
+      shared.loggers.forEach((logger) => {
+        if (!logger.woodpicked) {
+          fill(0);
+          circle(logger.x, logger.y, 10);
+        } else {
+          fill(0);
+          circle(logger.x, logger.y, 10);
+          fill("#795548");
+          circle(logger.x, logger.y + 10, 10);
+        }
+      });
+
+      //console.log((floor(int(millis())/1000)/10) % 1 == 0);
+      let randint = random();
+      if (randint < 0.001) {
+        setTimeout(growApples(), 3000);
+      }
     }
   }
 }
