@@ -97,7 +97,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(1280, 800);
+  createCanvas(1300, 650);
   textAlign(CENTER, CENTER);
 
   background(bgCol); //BG CONTROL HERE
