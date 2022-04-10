@@ -5,12 +5,12 @@ let shared, me, participants;
 let generateCheck = true;
 let y = 0;
 let treeArea = 150;
+let timer = 500;
+let hostLoggers = [];
 
 bgCol = "#a7d179";
 treeBranch = "#8c5c08";
 treeFoliage = "#088c0f";
-
-setInterval(() => allTrees(), 30);
 
 rules[0] = {
   X: "X",
@@ -20,6 +20,7 @@ rules[0] = {
   X3: "F-[[X]+X]+F[+FX]-X",
   F1: "FF",
 };
+
 function recurTree(x, y, l, a, s) {
   resetMatrix();
 
@@ -51,8 +52,10 @@ function recurTree(x, y, l, a, s) {
   translate(0, 0);
   pop();
 }
+
+
 function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
-  console.log(x, y, c, cmax, l, a, s, ls);
+  //console.log(x, y, c, cmax, l, a, s, ls);
   while (c < cmax) {
     l *= 0.5;
     let nextSentence = "";
@@ -86,13 +89,14 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
-    "studeg_deforestation",
+    "studeg_deforestation2",
     "main"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
 }
+
 function setup() {
   createCanvas(1280, 800);
   textAlign(CENTER, CENTER);
@@ -110,7 +114,16 @@ function setup() {
 
   me.apples = [];
   me.myTrees = [];
+  shared.loggers = [];
+  if(partyIsHost()){
+    hostLoggers.push(new Logger({x: random(width), y: random(height)}, {x: random(-6, 6), y: random(-6, 6)}, 6));
+  }
 }
+
+setInterval(() => allTrees(), 30);
+setInterval(() => addLogger(), 30000); 
+setInterval(() => rushLoggers(), 90000); 
+
 function mouseClicked() {
   if (me.setTree == false) {
     me.x = mouseX;
@@ -240,7 +253,118 @@ function allTrees() {
       pop();
     }
   }
+
+
+  if(partyIsHost()) {
+    shared.loggers = [];
+    hostLoggers.forEach((logger) => {
+      logger.move();
+      //logger.show();
+  
+      participants.forEach((p) => {
+        if(!logger.woodpicked){
+          //console.log(p.myTrees);
+  
+          // let partreeDist = dist(logger.pos.x, logger.pos.y, p.x, p.y);
+          // if(partreeDist < 30) {
+          //   //console.log('close');
+          //   logger.cutting = true;
+          //   if(partreeDist > 5) {
+          //     logger.d.x = lerp(logger.d.x, (p.x-logger.pos.x)/20, 0.2);
+          //     logger.d.y = lerp(logger.d.y, (p.y-logger.pos.y)/20, 0.2);
+          //   }else if(partreeDist < 5){
+          //     console.log('hit');
+          //     if(int(millis())/1000 % 60){
+          //       logger.cutTime--;
+          //     }
+              
+          //     if(logger.cutTime == 0){
+          //       logger.d.x = 0;
+          //       logger.d.y = 0;
+          //       p.x = null;
+          //       p.y = null;
+          //       //console.log(p.myTrees)
+          //       logger.woodpicked = true;
+          //     }
+          //     setTimeout(()=>{
+          //       logger.cutting = false;
+          //       logger.cutTime = 10;
+          //     }, 2000);
+    
+          //   }
+    
+          // } 
+  
+          let treeDist;
+          p.myTrees.forEach((t, index)=>{
+            treeDist = dist(logger.pos.x, logger.pos.y, t.x, t.y);
+            if(treeDist < 30) {
+              //console.log('close');
+              logger.cutting = true;
+              if(treeDist > 10) {
+                logger.d.x = lerp(logger.d.x, (t.x-logger.pos.x)/20, 0.2);
+                logger.d.y = lerp(logger.d.y, (t.y-logger.pos.y)/20, 0.2);
+              }else if(treeDist < 10){
+                //console.log('hit');
+                // if(int(millis())/1000 % 60){
+                //   logger.cutTime--;
+                // }
+                
+                //if(logger.cutTime == 0){
+                  //logger.d.x = 0;
+                  //logger.d.y = 0;
+                  p.myTrees.splice(index, 1);
+                  //console.log(p.myTrees)
+                  logger.woodpicked = true;
+                //}
+                setTimeout(()=>{
+                  logger.cutting = false;
+                  //logger.cutTime = 10;
+                }, 2000);
+      
+              }
+      
+            }          
+          });
+        }
+      });      
+      
+      shared.loggers.push({x: logger.pos.x, y: logger.pos.y, woodpicked: logger.woodpicked});
+    });
+
+  }
+
+  shared.loggers.forEach((logger) => {
+    if(!logger.woodpicked){
+      fill(0);
+      circle(logger.x, logger.y, 10);
+  }else{
+      fill(0);
+      circle(logger.x, logger.y, 10);
+      fill('#795548');
+      circle(logger.x, logger.y+10, 10);
+  }
+  });
+
+  
+
 }
+
+
+function addLogger(){
+  if(partyIsHost()){
+    hostLoggers.push(new Logger({x: random(width), y: random(height)}, {x: random(-6, 6), y: random(-6, 6)}, 6));
+  }
+}
+
+function rushLoggers(){
+  if(partyIsHost()){
+    hostLoggers.forEach((logger) => {
+      logger.step += 6;
+    });
+  }
+}
+
 function growApples() {
   if (me.setTree == true && me.apples.length < 3) {
     let treeHeight = treeHeightSum(me.branchLength, me.countMax);
