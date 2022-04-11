@@ -215,7 +215,7 @@ function mousePressed() {
     }
   }
 }
-function recurTree(x, y, l, a, s, c, num, shape) {
+function recurTree(x, y, l, a, s, c, num, shape, size) {
   resetMatrix();
   push();
   translate(x, y);
@@ -224,21 +224,31 @@ function recurTree(x, y, l, a, s, c, num, shape) {
     let current = s.charAt(i);
     if (current == "F") {
       fill(branchCol);
-      rect(0, 0, 5, -l);
+      if(c < 1){
+        rect(0, 0, 5, -l);
+      }else{
+        rect(0, 0, 2, -l);
+      }
+      //rect(0, 0, 5, -l);
       translate(0, -l, 1);
     } else if (current == "X") {
       for (const t of participants) {
+        fill(branchCol);
+      if(c < 1){
+        rect(0, 0, 5, -l);
+      }else{
+        rect(0, 0, 2, -l);
+      }
         if (num == 0) {
-          image(fol_a[shape], 0, -l, 30, 30);
+          image(fol_a[shape], 0, -l, size, size);
         } else if (num == 1) {
-          image(fol_b[shape], 0, -l, 30, 30);
+          image(fol_b[shape], 0, -l, size, size);
         } else if (num == 2) {
-          image(fol_c[shape], 0, -l, 30, 30);
+          image(fol_c[shape], 0, -l, size, size);
         }
       }
 
-      fill(branchCol);
-      rect(0, 0, 5, -l);
+      
       translate(0, -l, 1);
     } else if (current == "+") {
       rotate(a);
@@ -253,7 +263,7 @@ function recurTree(x, y, l, a, s, c, num, shape) {
   translate(0, 0);
   pop();
 }
-function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape) {
+function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape, size) {
   //console.log(x, y, c, cmax, l, a, s, ls);
   while (c < cmax) {
     l *= 0.5;
@@ -280,7 +290,7 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape) {
     }
     s = nextSentence;
     // createP(s);
-    recurTree(x, y, l, a, s, c, num, shape);
+    recurTree(x, y, l, a, s, c, num, shape, size);
     c++;
   }
 }
@@ -336,7 +346,8 @@ function allTrees() {
           t.sentence,
           t.lSystem,
           t.folNum,
-          t.folShape
+          t.folShape,
+          30
         );
 
         //draw the apples
@@ -359,7 +370,8 @@ function allTrees() {
             m.sentence,
             m.lSystem,
             m.folNum,
-            m.folShape
+            m.folShape,
+            20
           );
           pop();
         }
@@ -439,7 +451,7 @@ function allTrees() {
 
     //console.log((floor(int(millis())/1000)/10) % 1 == 0);
     let randint = random();
-    if (randint < 0.005) {
+    if (randint < 0.003) {
       setTimeout(growApples(), 3000);
     }
   }
@@ -498,6 +510,7 @@ function growApples() {
     let treeHeight = treeHeightSum(me.branchLength, me.countMax);
 
     me.apples.push({
+      x: random(me.x - 15, me.x + 25),
       y: random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight),
       move: false,
       planted: false,
@@ -507,13 +520,13 @@ function growApples() {
       me.y -
       me.branchLength -
       me.branchLength / 2 ** (me.countMax - me.countMax / 3);
-    for (const a of me.apples) {
-      if (a.y > appleYTop) {
-        a.x = random(me.x, me.x + 25);
-      } else if (a.y < appleYTop) {
-        a.x = random(me.x - 25, me.x + 25);
-      }
-    }
+    // for (const a of me.apples) {
+    //   if (a.y > appleYTop) {
+    //     a.x = random(me.x, me.x + 25);
+    //   } else if (a.y < appleYTop) {
+    //     a.x = random(me.x - 25, me.x + 25);
+    //   }
+    // }
     // console.log(me.apples);
   }
 }
