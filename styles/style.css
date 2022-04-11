@@ -7,7 +7,7 @@ body {
   font-family: 'Gloria Hallelujah', cursive;
   font-family: 'Rubik Microbe', cursive;
   display: inline;
-  background-color: var(--brown2);
+  background-color: var(--green1);
 }
 :root {
   --blue: #25399F;

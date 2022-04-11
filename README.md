@@ -1,3 +1,3 @@
 # deforestation game
-
-trees
+A forest clearing
+https://studio-degen.github.io/deforestation/
