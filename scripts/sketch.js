@@ -64,7 +64,7 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation_2",
-    "hwearng"
+    "fgdknx"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -154,8 +154,8 @@ function mousePressed() {
       me.x = mouseX;
       me.y = mouseY;
       me.count = 0;
-      me.countMax = int(random(1, 5));
-      me.branchLength = random(100, 50);
+      me.countMax = int(random(2, 5));
+      me.branchLength = random(130, 70);
       me.angle = radians(20);
       me.sentence = axiom;
       me.lSystem = int(random(1, 4));
@@ -193,6 +193,8 @@ function mousePressed() {
             sentence: axiom,
             lSystem: int(random(1, 4)),
             setTree: true,
+            folNum: floor(random(0, 3)),
+            folShape: floor(random(0, 3))
           });
 
           // adding apples back at a slower pace?
@@ -203,7 +205,7 @@ function mousePressed() {
     }
   }
 }
-function recurTree(x, y, l, a, s, c) {
+function recurTree(x, y, l, a, s, c, num, shape) {
   resetMatrix();
   push();
   translate(x, y);
@@ -216,12 +218,12 @@ function recurTree(x, y, l, a, s, c) {
       translate(0, -l, 1);
     } else if (current == "X") {
       for (const t of participants) {
-        if (t.folNum == 0) {
-          image(fol_a[t.folShape], 0, -l, 30, 30);
-        } else if (t.folNum == 1) {
-          image(fol_b[t.folShape], 0, -l, 30, 30);
-        } else if (t.folNum == 2) {
-          image(fol_c[t.folShape], 0, -l, 30, 30);
+        if (num == 0) {
+          image(fol_a[shape], 0, -l, 30, 30);
+        } else if (num == 1) {
+          image(fol_b[shape], 0, -l, 30, 30);
+        } else if (num == 2) {
+          image(fol_c[shape], 0, -l, 30, 30);
         }
       }
 
@@ -241,7 +243,7 @@ function recurTree(x, y, l, a, s, c) {
   translate(0, 0);
   pop();
 }
-function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
+function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape) {
   //console.log(x, y, c, cmax, l, a, s, ls);
   while (c < cmax) {
     l *= 0.5;
@@ -268,7 +270,7 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
     }
     s = nextSentence;
     // createP(s);
-    recurTree(x, y, l, a, s, c);
+    recurTree(x, y, l, a, s, c, num, shape);
     c++;
   }
 }
@@ -322,7 +324,9 @@ function allTrees() {
           t.branchLength,
           t.angle,
           t.sentence,
-          t.lSystem
+          t.lSystem,
+          t.folNum,
+          t.folShape
         );
 
         //draw the apples
@@ -343,7 +347,9 @@ function allTrees() {
             m.branchLength,
             m.angle,
             m.sentence,
-            m.lSystem
+            m.lSystem,
+            m.folNum,
+            m.folShape
           );
           pop();
         }
