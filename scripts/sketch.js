@@ -12,7 +12,7 @@ let fol_c = [];
 // let br1 = [];
 // let br2 = [];
 let appleImgs = [];
-let axeGif,woodGif;
+let axeGif,woodGif,appleTreeImg,treeAreaImg,threeApplesImg;
 let insGifs = [];
 let allOfTheTrees = [];
 let allOfTheChildTrees = [];
@@ -33,7 +33,7 @@ let pink = "#F0909C";
 let screenMode = 0;
 let gameScreenMode = 4;
 let instruct = 0;
-let lastPage = 5; //count of numer of instruction pages
+let lastPage = 4; //count of numer of instruction pages
 let nextButton;
 let nextButtonX = 150;
 let prevButton;
@@ -65,7 +65,7 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation",
-    "hw"
+    "hweng"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -74,6 +74,9 @@ function preload() {
   for(let i=1; i<5; i++){
     insGifs.push(loadImage("assets/ins_"+i+".gif"));
   }
+  appleTreeImg = loadImage("assets/appleTreeImg.png");
+  treeAreaImg = loadImage("assets/treeAreaImg.png");
+  threeApplesImg = loadImage("assets/threeApplesImg.png");
 
   for (let i = 1; i < 4; i++) {
     fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
@@ -95,8 +98,9 @@ function preload() {
 }
 function setup() {
   createCanvas(1300, 650);
-  // textAlign(CENTER, CENTER);
+  textAlign(CENTER, CENTER);
   imageMode(CENTER);
+  textSize(25);
   textFont('Inter');
 
   background(bgCol); //BG CONTROL HERE
@@ -545,36 +549,44 @@ function gameState() {
 }
 function instructionScreen() {
   background(bgCol);
+  push();
+  rectMode(CENTER);
   switch (instruct) {
     case 0:
       //title screen
       showButtons();
-      textSize(32);
-      text("Page 1", 10, 30);
       break;
     case 1:
       //actual instructions start
       showButtons();
-      image(insGifs[0],width/2,height/2);
-      text("Page 2", 10, 30);
+      image(appleTreeImg,width/3,250,300,300);
+      text("You are an apple tree.",width/3, 450);
+      image(insGifs[0],width/3*2,250,300,300);
+      text("Click to plant yourself in the field when the game starts.", width/3*2,450,325);
       break;
     case 2:
       showButtons();
-      text("Page 3", 10, 30);
+      image(insGifs[1],width/3,250,300,300);
+      text("Apples grow on your tree. Click to pick one up and click on the ground to plant it.", width/3,450,360);
+      image(treeAreaImg,width/3*2,250,300,300);
+      text("You can only plant trees in your circle area. The area will increase as time passes.", width/3*2,450,350);
       break;
     case 3:
       showButtons();
-      text("Page 4", 10, 30);
+      image(threeApplesImg,width/3,250,300,300);
+      text("You can grow up to 3 apples on your tree at a time.", width/3,450,350);
+      image(insGifs[2],width/3*2,250,300,300);
+      text("Apples will automatically grow back after a couple of seconds.",width/3*2,450,350);
       break;
     case 4:
       showButtons();
-      text("Page 5", 10, 30);
-      break;
-    case 5:
-      showButtons();
-      text("Page 6", 10, 30);
+      image(insGifs[3],width/3,250,300,300);
+      text("There are humans running around who will cut your trees down.",width/3,450,350);
+      image(axeGif,width/3*2,250,200,200);
+      text("Grow the forest with your other tree friends and stay alive as long as you can!",width/3*2,450,350);
       break;
   }
+  pop();
 }
 function readyScreen() {
   showButtons();
