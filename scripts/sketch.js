@@ -775,7 +775,7 @@ function readyScreen() {
       textAlign(CENTER);
       textSize(40);
       fill(yellow);
-      text("HOST", width / 2, 80);
+      text("PLAYERS", width / 2, 80);
       textSize(30);
       text("waiting for host to launch game", width / 2, 130);
       pop();
