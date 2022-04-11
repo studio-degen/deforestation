@@ -4,7 +4,13 @@ let shared, me, participants;
 let generateCheck = true;
 let y = 0;
 let timer = 500;
-let axeGif, woodGif, appleTreeImg, treeAreaImg, threeApplesImg, clockImg, treeCountImg;
+let axeGif,
+  woodGif,
+  appleTreeImg,
+  treeAreaImg,
+  threeApplesImg,
+  clockImg,
+  treeCountImg;
 //let gameTime = 0;
 //let gameBegin = false;
 let gameOver = false;
@@ -84,7 +90,7 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation_0",
-    "main"
+    "tm"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -343,10 +349,10 @@ function allTrees() {
     // console.log(shared.gameStartChk, screenMode, gameScreenMode);
     background(bgCol);
     drawFlora();
-    if(partyIsHost()){
+    if (partyIsHost()) {
       shared.gameBegin = true;
     }
-    
+
     // text(gameTime, width - 200, 100);
     // text(allOfTheChildTrees.length, width - 200, 140);
 
@@ -502,14 +508,14 @@ function allTrees() {
 
     push();
     // rectMode(CENTER);
-    
-    fill(255,255,255,200);
-    rect(width-115,35,80,75);
+
+    fill(255, 255, 255, 200);
+    rect(width - 115, 35, 80, 75);
     fill(brown2);
-    text(shared.gameTime, width-80, 60);
-    image(clockImg,width-100,53,20,20);
-    text(allOfTheChildTrees.length, width-80, 100);
-    image(treeCountImg,width-100,93,20,20);
+    text(shared.gameTime, width - 80, 60);
+    image(clockImg, width - 100, 53, 20, 20);
+    text(allOfTheChildTrees.length, width - 80, 100);
+    image(treeCountImg, width - 100, 93, 20, 20);
     pop();
   }
 }
@@ -538,7 +544,7 @@ function rushScene() {
   }
 }
 function gameTimer() {
-  if(partyIsHost()){
+  if (partyIsHost()) {
     if (shared.gameBegin) {
       shared.gameTime++;
     }
@@ -782,6 +788,7 @@ function readyScreen() {
     textSize(40);
     fill(yellow);
     text("VIEWER", width / 2, 80);
+    textAlign(LEFT);
     textSize(30);
     text("game is already in session. Join as viewer", prevButtonX / 2, 130);
     pop();
