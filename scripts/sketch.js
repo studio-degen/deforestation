@@ -160,8 +160,8 @@ function mousePressed() {
       me.x = mouseX;
       me.y = mouseY;
       me.count = 0;
-      me.countMax = int(random(1, 5));
-      me.branchLength = random(100, 50);
+      me.countMax = int(random(2, 5));
+      me.branchLength = random(130, 70);
       me.angle = radians(20);
       me.sentence = axiom;
       me.lSystem = int(random(1, 4));
@@ -199,6 +199,8 @@ function mousePressed() {
             sentence: axiom,
             lSystem: int(random(1, 4)),
             setTree: true,
+            folNum: floor(random(0, 3)),
+            folShape: floor(random(0, 3))
           });
 
           // adding apples back at a slower pace?
@@ -209,7 +211,7 @@ function mousePressed() {
     }
   }
 }
-function recurTree(x, y, l, a, s) {
+function recurTree(x, y, l, a, s, c, num, shape) {
   resetMatrix();
   push();
   translate(x, y);
@@ -218,21 +220,21 @@ function recurTree(x, y, l, a, s) {
     let current = s.charAt(i);
     if (current == "F") {
       fill(branchCol);
-      rect(0, 0, 3, -l);
+      rect(0, 0, 5, -l);
       translate(0, -l, 1);
     } else if (current == "X") {
       for (const t of participants) {
-        if (t.folNum == 0) {
-          image(fol_a[t.folShape], 0, -l, 30, 30);
-        } else if (t.folNum == 1) {
-          image(fol_b[t.folShape], 0, -l, 30, 30);
-        } else if (t.folNum == 2) {
-          image(fol_c[t.folShape], 0, -l, 30, 30);
+        if (num == 0) {
+          image(fol_a[shape], 0, -l, 30, 30);
+        } else if (num == 1) {
+          image(fol_b[shape], 0, -l, 30, 30);
+        } else if (num == 2) {
+          image(fol_c[shape], 0, -l, 30, 30);
         }
       }
 
       fill(branchCol);
-      rect(0, 0, 3, -l);
+      rect(0, 0, 5, -l);
       translate(0, -l, 1);
     } else if (current == "+") {
       rotate(a);
@@ -247,7 +249,7 @@ function recurTree(x, y, l, a, s) {
   translate(0, 0);
   pop();
 }
-function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
+function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape) {
   //console.log(x, y, c, cmax, l, a, s, ls);
   while (c < cmax) {
     l *= 0.5;
@@ -274,7 +276,7 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
     }
     s = nextSentence;
     // createP(s);
-    recurTree(x, y, l, a, s);
+    recurTree(x, y, l, a, s, c, num, shape);
     c++;
   }
 }
@@ -286,6 +288,8 @@ function allTrees() {
     background(bgCol);
 
     gameBegin = true;
+    text(gameTime, width-200, 100)
+    text(allOfTheChildTrees.length, width-200, 140);
 
     if (me.state == "viewer") {
       push();
@@ -326,7 +330,9 @@ function allTrees() {
           t.branchLength,
           t.angle,
           t.sentence,
-          t.lSystem
+          t.lSystem,
+          t.folNum,
+          t.folShape
         );
 
         //draw the apples
@@ -347,7 +353,9 @@ function allTrees() {
             m.branchLength,
             m.angle,
             m.sentence,
-            m.lSystem
+            m.lSystem,
+            m.folNum,
+            m.folShape
           );
           pop();
         }
@@ -474,6 +482,9 @@ function gameTimer() {
   if (gameTime >= 60) {
     if (allOfTheChildTrees.length == 0) {
       gameOver = true;
+
+      screenMode = 5;
+
     }
   }
   // console.log(gameTime, allOfTheTrees.length);
@@ -528,7 +539,7 @@ function gameState() {
       gameScreen(); //this reassigns host if the host exists the game. So the game will continue as long as atleast one player is in the room
       break;
     case 5:
-      winScreen(); //not implemented
+      endScreen(); //not implemented
       break;
   }
 }
@@ -575,6 +586,7 @@ function readyScreen() {
     text("game is already in session. Join as viewer", 20, 30);
     me.state = "viewer";
   }
+
 }
 function launchScreen() {
   showButtons();
@@ -585,6 +597,9 @@ function launchScreen() {
     } else {
       text("waiting for host to launch game", 20, 30);
     }
+    for (let i = 0; i < participants.length; i++) {
+      image(appleImgs[me.appleShape], (width/2-(participants.length/2)*100) + 100*i, height/2, 50, 50);
+    }
   } else {
     screenMode = 4;
   }
@@ -593,6 +608,9 @@ function gameScreen() {
   showButtons();
   screenMode = 4;
   shared.gameStartChk = true; //need to set this on button click
+}
+function endScreen(){
+  background(red);
 }
 function nextFn() {
   instruct++;
