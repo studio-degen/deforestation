@@ -27,32 +27,46 @@ canvas {
   margin: auto;
   left: 0;
   right: 0;
-  bottom: 50px;
+  bottom: 0;
+  top:0;
 }
 h1 {
   font-size: 50px;
-  margin: 30px auto 15px auto;
+  margin: 10px auto 10px auto;
   width: fit-content;
   color: var(--yellow);
+  z-index:5;
+  pointer-events: none;
 }
 button {
-	box-shadow:inset 0px 33px 0px -15px var(--brown2);
-	background-color:var(--brown1);
-	border:1px solid var(--yellow);
-	display:inline-block;
-	cursor:pointer;
-	color: white;
-	font-family:Arial;
-	font-size:15px;
-	font-weight:bold;
-	padding:9px 23px;
-	text-decoration:none;
-	text-shadow:0px -1px 0px var(--brown2);
+  -webkit-border-radius: 4;
+  -moz-border-radius: 4;
+  border-radius: 4px;
+  font-family: Inter;
+  color: var(--green1);
+  font-size: 13px;
+  background: var(--yellow);
+  padding: 10px 15px;
+  border: solid var(--green1) 2px;
+  text-decoration: none;
 }
+
 button:hover {
-	opacity: 90%;
+  opacity: 80%;
+  text-decoration: none;
 }
 button:active {
 	position:relative;
 	top:1px;
+}
+#texture{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100vw;
+  height: 100vh;
+  z-index:5;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  opacity:20%;
 }

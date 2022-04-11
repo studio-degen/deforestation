@@ -20,6 +20,17 @@ let gameTime = 0;
 let gameBegin = false;
 let gameOver = false;
 
+let w = [];
+let h = [];
+let c = [];
+let cm = [];
+let l = [];
+let a = [];
+let s = [];
+let ls = [];
+let n = [];
+let sh = []; //home screen tree gen
+
 let blue = "#25399F";
 let brown1 = "#584239";
 let brown2 = "#6C523B";
@@ -54,6 +65,14 @@ let shadowCol = (rules[0] = {
   X3: "F-[[X]+X]+F[+FX]-X",
   F1: "FF",
 });
+
+//FLORA STUFF
+floraArr = [];
+bush = [];
+flower = [];
+rockClump = [];
+floraCount = 0;
+floraInterval = 5000;
 
 setInterval(() => gameState(), 30);
 setInterval(() => allTrees(), 30);
@@ -103,8 +122,9 @@ function setup() {
   // textAlign(CENTER, CENTER);
   imageMode(CENTER);
   textFont("Inter");
+  partyToggleInfo();
 
-  background(bgCol); //BG CONTROL HERE
+  background(green1); //BG CONTROL HERE
   noStroke();
   me.x = 0;
   me.y = 0;
@@ -131,9 +151,10 @@ function setup() {
   me.apples = [];
   me.myTrees = [];
   shared.loggers = [];
-  shared.gameStartChk = false;
   if (partyIsHost()) {
+    shared.gameStartChk = false;
     instruct = 0;
+    screenMode = 0;
     hostLoggers.push(
       new Logger(
         { x: random(width), y: random(height) },
@@ -154,6 +175,18 @@ function setup() {
   finButton = createButton(finButtonTxt);
   finButton.position(prevButtonX, height);
   finButton.mousePressed(finFn);
+  for (let i = 0; i < 3; i++) {
+    w[i] = width / 2 + i * 100; //homescreen tree generation
+    h[i] = height / 2 + ((i % 2) + 1) * 100;
+    c[i] = 0;
+    cm[i] = int(random(2, 5));
+    l[i] = random(150, 120);
+    a[i] = radians(20);
+    s[i] = axiom;
+    ls[i] = int(random(1, 4));
+    n[i] = floor(random(0, 3));
+    sh[i] = floor(random(0, 3));
+  }
 }
 function mousePressed() {
   if (
@@ -537,7 +570,7 @@ function gameState() {
       // console.log("ready screen");
       break;
     case 3: //i think this is a bug, it doesn't work if screenmode 2
-      launchScreen();
+      // launchScreen();
       break;
     case 4:
       gameScreen(); //this reassigns host if the host exists the game. So the game will continue as long as atleast one player is in the room
@@ -548,13 +581,12 @@ function gameState() {
   }
 }
 function instructionScreen() {
-  background(bgCol);
+  background(green1);
   switch (instruct) {
     case 0:
       //title screen
       showButtons();
-      textSize(32);
-      text("Page 1", 10, 30);
+      homeScreen();
       break;
     case 1:
       //actual instructions start
@@ -580,15 +612,88 @@ function instructionScreen() {
       break;
   }
 }
+function homeScreen() {
+  background(brown2);
+  for (let i = 0; i < 3; i++) {
+    console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
+    generateNewSentence(
+      w[i],
+      h[i],
+      c[i],
+      cm[i],
+      l[i],
+      a[i],
+      s[i],
+      ls[i],
+      n[i],
+      sh[i]
+    );
+  }
+}
+let showButtonTemp = false;
 function readyScreen() {
   showButtons();
-  background(green3);
+  background(green1);
   if (shared.gameStartChk == false) {
-    text("ready to play?", 20, 30);
     me.state = "player";
+    for (let i = 0; i < participants.length; i++) {
+      if (participants[i].state == "player") {
+        image(
+          appleImgs[me.appleShape],
+          width / 2 - (participants.length / 2) * 100 + 100 * i,
+          height / 2,
+          50,
+          50
+        );
+        textSize(20);
+        fill(yellow);
+        text(
+          "player " + (i + 1),
+          width / 2 - (participants.length / 2) * 100 + 100 * i,
+          height / 2 + 20
+        );
+      }
+    }
+    if (partyIsHost()) {
+      push();
+      textAlign(CENTER);
+      textSize(40);
+      fill(yellow);
+      text("HOST", width / 2, 80);
+      pop();
+      push();
+      textSize(30);
+      fill(yellow);
+      text("Click 'Start Game' to launch game", prevButtonX / 2, 130);
+      text(
+        "Remember to wait for all the players to join before you start",
+        prevButtonX / 2,
+        170
+      );
+      text(
+        "If someone tries to join after the game has started,",
+        prevButtonX / 2,
+        210
+      );
+      text("they will only be able to view the game", prevButtonX / 2, 250);
+      pop();
+      showButtonTemp = true;
+    } else {
+      push();
+      textAlign(CENTER);
+      textSize(40);
+      fill(yellow);
+      text("HOST", width / 2, 80);
+      textSize(30);
+      text("waiting for host to launch game", width / 2, 130);
+      pop();
+    }
+  } else if (shared.gameStartChk == true && me.state == "player") {
+    screenMode = 4;
   } else {
     text("game is already in session. Join as viewer", 20, 30);
     me.state = "viewer";
+    showButtonTemp = true;
   }
 }
 function launchScreen() {
@@ -623,40 +728,51 @@ function endScreen() {
 }
 function nextFn() {
   instruct++;
+  console.log(instruct);
 }
 function prevFn() {
   instruct--;
+  console.log(instruct);
 }
 function finFn() {
-  screenMode++;
-  // console.log(screenMode);
+  console.log(screenMode);
+  if (screenMode == 1) {
+    screenMode = 4;
+  } else screenMode++;
 }
 function showButtons() {
   if (screenMode == 0) {
     if (instruct == 0) {
+      prevButton.position(prevButtonX, height - 50);
       prevButton.hide();
+      nextButton.position(width / 2 - 2 * nextButtonX, height / 2);
       nextButton.show();
+      finButton.position(
+        width / 2 - 2 * finButtonX,
+        height / 2 - +finButtonX / 2
+      );
       finButton.show();
-      finButton.position(finButtonX, height);
     } else if (instruct == lastPage) {
+      prevButton.position(prevButtonX, height - 50);
       prevButton.show();
+      nextButton.position(width - nextButtonX, height - 50);
       nextButton.hide();
+      finButton.position(width - finButtonX, height - 50);
       finButton.show();
-      finButton.position(width - finButtonX, height);
     } else {
+      prevButton.position(prevButtonX, height - 50);
       prevButton.show();
+      nextButton.position(width - nextButtonX, height - 50);
       nextButton.show();
+      finButton.position(prevButtonX, height);
       finButton.hide();
     }
-  } else if (screenMode == 1) {
+  } else if (screenMode == 1 && showButtonTemp == true) {
     prevButton.hide();
     nextButton.hide();
+    finButton.position(prevButtonX, height - 50);
     finButton.show();
-  } else if (screenMode == 3 && partyIsHost()) {
-    prevButton.hide();
-    nextButton.hide();
-    finButton.show();
-  } else if (screenMode > 3) {
+  } else if (screenMode > 1) {
     prevButton.hide();
     nextButton.hide();
     finButton.hide();
@@ -666,13 +782,7 @@ function showButtons() {
     finButton.hide();
   }
 }
-//FLORA STUFF
-floraArr = [];
-bush = [];
-flower = [];
-rockClump = [];
-floraCount = 0;
-floraInterval = 5000;
+
 setInterval(addFlora, floraInterval);
 function drawFlora() {
   // if (partyIsHost()) {
