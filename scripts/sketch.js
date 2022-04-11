@@ -5,8 +5,8 @@ let generateCheck = true;
 let y = 0;
 let timer = 500;
 let axeGif, woodGif, appleTreeImg, treeAreaImg, threeApplesImg, clockImg, treeCountImg;
-let gameTime = 0;
-let gameBegin = false;
+//let gameTime = 0;
+//let gameBegin = false;
 let gameOver = false;
 let screenMode = 0;
 let gameScreenMode = 4;
@@ -83,7 +83,7 @@ setInterval(addFlora, floraInterval);
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
-    "studeg_deforestation",
+    "studeg_deforestation_0",
     "main"
   );
   shared = partyLoadShared("globals");
@@ -158,6 +158,8 @@ function setup() {
   shared.loggers = [];
   if (partyIsHost()) {
     shared.gameStartChk = false;
+    shared.gameTime = 0;
+    shared.gameBegin = false;
     instruct = 0;
     screenMode = 0;
     hostLoggers.push(
@@ -264,6 +266,7 @@ function recurTree(x, y, l, a, s, c, num, shape, size) {
     let current = s.charAt(i);
     if (current == "F") {
       fill(brown1);
+      rectMode(CORNER);
       if (c < 1) {
         rect(0, 0, 5, -l);
       } else {
@@ -274,6 +277,7 @@ function recurTree(x, y, l, a, s, c, num, shape, size) {
     } else if (current == "X") {
       for (const t of participants) {
         fill(brown1);
+        rectMode(CORNER);
         if (c < 1) {
           rect(0, 0, 5, -l);
         } else {
@@ -339,7 +343,10 @@ function allTrees() {
     // console.log(shared.gameStartChk, screenMode, gameScreenMode);
     background(bgCol);
     drawFlora();
-    gameBegin = true;
+    if(partyIsHost()){
+      shared.gameBegin = true;
+    }
+    
     // text(gameTime, width - 200, 100);
     // text(allOfTheChildTrees.length, width - 200, 140);
 
@@ -499,7 +506,7 @@ function allTrees() {
     fill(255,255,255,200);
     rect(width-115,35,80,75);
     fill(brown2);
-    text(gameTime, width-80, 60);
+    text(shared.gameTime, width-80, 60);
     image(clockImg,width-100,53,20,20);
     text(allOfTheChildTrees.length, width-80, 100);
     image(treeCountImg,width-100,93,20,20);
@@ -531,8 +538,10 @@ function rushScene() {
   }
 }
 function gameTimer() {
-  if (gameBegin) {
-    gameTime++;
+  if(partyIsHost()){
+    if (shared.gameBegin) {
+      shared.gameTime++;
+    }
   }
 
   allOfTheTrees = [];
@@ -545,7 +554,7 @@ function gameTimer() {
     });
   });
 
-  if (gameTime >= 60) {
+  if (shared.gameTime >= 60) {
     if (allOfTheChildTrees.length == 0) {
       gameOver = true;
       screenMode = 5;
@@ -609,6 +618,7 @@ function gameState() {
   }
 }
 function instructionScreen() {
+  nextButton.html("NEXT");
   background(green1);
   push();
   rectMode(CENTER);
@@ -688,6 +698,7 @@ function instructionScreen() {
   pop();
 }
 function homeScreen() {
+  nextButton.html("INSTRUCTIONS");
   background(brown2);
   for (let i = 0; i < 3; i++) {
     // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
@@ -813,7 +824,7 @@ function endScreen() {
   fill(yellow);
   text("WHOOP", width / 2, 80);
   textSize(30);
-  text("You lasted " + gameTime + " mins", width / 2 - 300, 130);
+  text("You lasted " + shared.gameTime + " secs", width / 2 - 300, 130);
   text("Better luck next time :)", width / 2 - 300, 170);
   pop();
   for (let i = 0; i < 3; i++) {
