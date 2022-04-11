@@ -6,17 +6,35 @@ class Logger {
     this.cutting = false;
     this.woodpicked = false;
     this.cutTime = 10;
+    this.destrand = random();
     }
 
     move(){
         let rand = random();
         if(!this.cutting){
-        if(rand < 0.3){
-            this.d.x = lerp(this.d.x, random(-this.step, this.step), 0.2);
-            this.d.y = lerp(this.d.y, random(-this.step, this.step), 0.2);
+            if(!this.woodpicked){
+                if(rand < 0.3){
+                    this.d.x = lerp(this.d.x, random(-this.step, this.step), 0.2);
+                    this.d.y = lerp(this.d.y, random(-this.step, this.step), 0.2);
+                }
+            }else{
+                if(this.destrand > 0.75){
+                    this.d.x = lerp(this.d.x, random(-7, 7), 0.2);
+                    this.d.y = lerp(this.d.y, random(0, this.step), 0.2);
+                }else if(this.destrand < 0.75 && this.destrand > 0.5){
+                    this.d.x = lerp(this.d.x, random(0, this.step), 0.2);
+                    this.d.y = lerp(this.d.y, random(-7, 7), 0.2);;
+                }else if(this.destrand < 0.5 && this.destrand > 0.25){
+                    this.d.x = lerp(this.d.x, random(-this.step, 0), 0.2);
+                    this.d.y = lerp(this.d.y, random(-7, 7), 0.2);;
+                }else{
+                    this.d.x = lerp(this.d.x, random(-7, 7), 0.2);;
+                    this.d.y = lerp(this.d.y, random(-this.step, 0), 0.2);
+                }
+            }
         }
 
-        }
+
         this.pos.x += this.d.x;
         this.pos.y += this.d.y;
 
