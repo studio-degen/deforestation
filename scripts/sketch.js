@@ -7,7 +7,7 @@ let timer = 500;
 let axeGif, woodGif, appleTreeImg, treeAreaImg, threeApplesImg, clockImg, treeCountImg;
 //let gameTime = 0;
 //let gameBegin = false;
-let gameOver = false;
+//let gameOver = false;
 let screenMode = 0;
 let gameScreenMode = 4;
 let instruct = 0;
@@ -156,6 +156,7 @@ function setup() {
   me.apples = [];
   me.myTrees = [];
   shared.loggers = [];
+  shared.gameOver = false;
   if (partyIsHost()) {
     shared.gameStartChk = false;
     shared.gameTime = 0;
@@ -504,9 +505,9 @@ function allTrees() {
     // rectMode(CENTER);
     
     fill(255,255,255,200);
-    rect(width-115,35,80,75);
+    rect(width-115,35,90,75);
     fill(brown2);
-    text(shared.gameTime, width-80, 60);
+    text(floor(shared.gameTime/60) + ":" + floor(shared.gameTime%60), width-80, 60);
     image(clockImg,width-100,53,20,20);
     text(allOfTheChildTrees.length, width-80, 100);
     image(treeCountImg,width-100,93,20,20);
@@ -539,7 +540,7 @@ function rushScene() {
 }
 function gameTimer() {
   if(partyIsHost()){
-    if (shared.gameBegin) {
+    if (shared.gameBegin && !shared.gameOver) {
       shared.gameTime++;
     }
   }
@@ -556,7 +557,7 @@ function gameTimer() {
 
   if (shared.gameTime >= 60) {
     if (allOfTheChildTrees.length == 0) {
-      gameOver = true;
+      shared.gameOver = true;
       screenMode = 5;
     }
   }
@@ -824,7 +825,7 @@ function endScreen() {
   fill(yellow);
   text("WHOOP", width / 2, 80);
   textSize(30);
-  text("You lasted " + shared.gameTime + " secs", width / 2 - 300, 130);
+  text("You lasted " + floor(shared.gameTime/60) + " mins and " + floor(shared.gameTime%60) + " secs", width / 2 - 300, 130);
   text("Better luck next time :)", width / 2 - 300, 170);
   pop();
   for (let i = 0; i < 3; i++) {
