@@ -4,7 +4,13 @@ let shared, me, participants;
 let generateCheck = true;
 let y = 0;
 let timer = 500;
-let axeGif, woodGif, appleTreeImg, treeAreaImg, threeApplesImg, clockImg, treeCountImg;
+let axeGif,
+  woodGif,
+  appleTreeImg,
+  treeAreaImg,
+  threeApplesImg,
+  clockImg,
+  treeCountImg;
 //let gameTime = 0;
 //let gameBegin = false;
 //let gameOver = false;
@@ -84,7 +90,7 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation_0",
-    "main"
+    "tm"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -344,10 +350,10 @@ function allTrees() {
     // console.log(shared.gameStartChk, screenMode, gameScreenMode);
     background(bgCol);
     drawFlora();
-    if(partyIsHost()){
+    if (partyIsHost()) {
       shared.gameBegin = true;
     }
-    
+
     // text(gameTime, width - 200, 100);
     // text(allOfTheChildTrees.length, width - 200, 140);
 
@@ -783,6 +789,7 @@ function readyScreen() {
     textSize(40);
     fill(yellow);
     text("VIEWER", width / 2, 80);
+    textAlign(LEFT);
     textSize(30);
     text("game is already in session. Join as viewer", prevButtonX / 2, 130);
     pop();
