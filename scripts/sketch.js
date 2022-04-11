@@ -9,10 +9,11 @@ let hostLoggers = [];
 let fol_a = [];
 let fol_b = [];
 let fol_c = [];
-let br1 = [];
-let br2 = [];
+// let br1 = [];
+// let br2 = [];
 let appleImgs = [];
 let axeGif, woodGif;
+let insGifs = [];
 let allOfTheTrees = [];
 let allOfTheChildTrees = [];
 let gameTime = 0;
@@ -70,6 +71,10 @@ function preload() {
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
 
+  for (let i = 1; i < 5; i++) {
+    insGifs.push(loadImage("assets/ins_" + i + ".gif"));
+  }
+
   for (let i = 1; i < 4; i++) {
     fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
     fol_b[i - 1] = loadImage("assets/fol_b_" + i + ".png");
@@ -78,12 +83,12 @@ function preload() {
     appleImgs[i - 1] = loadImage("assets/apple" + i + ".png");
   }
 
-  for (let j = 1; j < 6; j++) {
-    for (let k = 1; k < 2; k++) {
-      br1.push(loadImage(`assets/br${1}_${j}_${k}.png`));
-      br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
-    }
-  }
+  // for (let j = 1; j < 5; j++) {
+  //   for (let k = 1; k < 2; k++) {
+  //     br1.push(loadImage(`assets/br${1}_${j}_${k}.png`));
+  //     br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
+  //   }
+  // }
 
   axeGif = loadImage("assets/logger_axe.gif");
   woodGif = loadImage("assets/logger_wood.gif");
@@ -97,6 +102,7 @@ function setup() {
   createCanvas(1300, 650);
   // textAlign(CENTER, CENTER);
   imageMode(CENTER);
+  textFont("Inter");
 
   background(bgCol); //BG CONTROL HERE
   noStroke();
@@ -159,8 +165,8 @@ function mousePressed() {
       me.x = mouseX;
       me.y = mouseY;
       me.count = 0;
-      me.countMax = int(random(1, 5));
-      me.branchLength = random(100, 50);
+      me.countMax = int(random(2, 5));
+      me.branchLength = random(130, 70);
       me.angle = radians(20);
       me.sentence = axiom;
       me.lSystem = int(random(1, 4));
@@ -198,6 +204,8 @@ function mousePressed() {
             sentence: axiom,
             lSystem: int(random(1, 4)),
             setTree: true,
+            folNum: floor(random(0, 3)),
+            folShape: floor(random(0, 3)),
           });
 
           // adding apples back at a slower pace?
@@ -208,7 +216,7 @@ function mousePressed() {
     }
   }
 }
-function recurTree(x, y, l, a, s, c) {
+function recurTree(x, y, l, a, s, c, num, shape) {
   resetMatrix();
   push();
   translate(x, y);
@@ -221,12 +229,12 @@ function recurTree(x, y, l, a, s, c) {
       translate(0, -l, 1);
     } else if (current == "X") {
       for (const t of participants) {
-        if (t.folNum == 0) {
-          image(fol_a[t.folShape], 0, -l, 30, 30);
-        } else if (t.folNum == 1) {
-          image(fol_b[t.folShape], 0, -l, 30, 30);
-        } else if (t.folNum == 2) {
-          image(fol_c[t.folShape], 0, -l, 30, 30);
+        if (num == 0) {
+          image(fol_a[shape], 0, -l, 30, 30);
+        } else if (num == 1) {
+          image(fol_b[shape], 0, -l, 30, 30);
+        } else if (num == 2) {
+          image(fol_c[shape], 0, -l, 30, 30);
         }
       }
 
@@ -246,7 +254,7 @@ function recurTree(x, y, l, a, s, c) {
   translate(0, 0);
   pop();
 }
-function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
+function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape) {
   //console.log(x, y, c, cmax, l, a, s, ls);
   while (c < cmax) {
     l *= 0.5;
@@ -273,15 +281,15 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
     }
     s = nextSentence;
     // createP(s);
-    recurTree(x, y, l, a, s, c);
+    recurTree(x, y, l, a, s, c, num, shape);
     c++;
   }
 }
 // we need to do the thing where the drawing order is based on y position so the trees at the top are behind the ones towards the bottom
 function allTrees() {
-  //console.log(shared.gameStartChk, screenMode, gameScreenMode);
+  // console.log(shared.gameStartChk, screenMode, gameScreenMode);
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
-    //console.log(shared.gameStartChk, screenMode, gameScreenMode);
+    // console.log(shared.gameStartChk, screenMode, gameScreenMode);
     background(bgCol);
     drawFlora();
     gameBegin = true;
@@ -327,7 +335,9 @@ function allTrees() {
           t.branchLength,
           t.angle,
           t.sentence,
-          t.lSystem
+          t.lSystem,
+          t.folNum,
+          t.folShape
         );
 
         //draw the apples
@@ -348,7 +358,9 @@ function allTrees() {
             m.branchLength,
             m.angle,
             m.sentence,
-            m.lSystem
+            m.lSystem,
+            m.folNum,
+            m.folShape
           );
           pop();
         }
@@ -479,6 +491,7 @@ function gameTimer() {
       screenMode = 5;
     }
   }
+  // console.log(gameTime, allOfTheTrees.length);
 }
 function growApples() {
   if (me.setTree == true && me.apples.length < 3) {
@@ -517,11 +530,11 @@ function gameState() {
   switch (screenMode) {
     case 0:
       instructionScreen();
-      //console.log("instructions");
+      // console.log("instructions");
       break;
     case 1:
       readyScreen();
-      //console.log("ready screen");
+      // console.log("ready screen");
       break;
     case 3: //i think this is a bug, it doesn't work if screenmode 2
       launchScreen();
@@ -535,15 +548,18 @@ function gameState() {
   }
 }
 function instructionScreen() {
-  background(green4);
+  background(bgCol);
   switch (instruct) {
     case 0:
+      //title screen
       showButtons();
       textSize(32);
       text("Page 1", 10, 30);
       break;
     case 1:
+      //actual instructions start
       showButtons();
+      image(insGifs[0], width / 2, height / 2);
       text("Page 2", 10, 30);
       break;
     case 2:
@@ -613,7 +629,7 @@ function prevFn() {
 }
 function finFn() {
   screenMode++;
-  console.log(screenMode);
+  // console.log(screenMode);
 }
 function showButtons() {
   if (screenMode == 0) {
