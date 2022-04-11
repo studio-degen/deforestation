@@ -4,7 +4,7 @@ let shared, me, participants;
 let generateCheck = true;
 let y = 0;
 let timer = 500;
-let axeGif, woodGif, appleTreeImg, treeAreaImg, threeApplesImg;
+let axeGif, woodGif, appleTreeImg, treeAreaImg, threeApplesImg, clockImg, treeCountImg;
 let gameTime = 0;
 let gameBegin = false;
 let gameOver = false;
@@ -84,7 +84,7 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation",
-    "tm7"
+    "main"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -96,6 +96,8 @@ function preload() {
   appleTreeImg = loadImage("assets/appleTreeImg.png");
   treeAreaImg = loadImage("assets/treeAreaImg.png");
   threeApplesImg = loadImage("assets/threeApplesImg.png");
+  clockImg = loadImage("assets/clock.png");
+  treeCountImg = loadImage("assets/treeCount.png");
 
   for (let i = 1; i < 4; i++) {
     fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
@@ -338,8 +340,8 @@ function allTrees() {
     background(bgCol);
     drawFlora();
     gameBegin = true;
-    text(gameTime, width - 200, 100);
-    text(allOfTheChildTrees.length, width - 200, 140);
+    // text(gameTime, width - 200, 100);
+    // text(allOfTheChildTrees.length, width - 200, 140);
 
     if (me.state == "viewer") {
       push();
@@ -490,6 +492,18 @@ function allTrees() {
     if (randint < 0.003) {
       setTimeout(growApples(), 3000);
     }
+
+    push();
+    // rectMode(CENTER);
+    
+    fill(255,255,255,200);
+    rect(width-115,35,80,75);
+    fill(brown2);
+    text(gameTime, width-80, 60);
+    image(clockImg,width-100,53,20,20);
+    text(allOfTheChildTrees.length, width-80, 100);
+    image(treeCountImg,width-100,93,20,20);
+    pop();
   }
 }
 function addLogger() {
