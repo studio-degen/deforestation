@@ -1,10 +1,27 @@
 let axiom = "X"; //starting point
 let treeGrowInterval = 1000;
-let rules = [];
 let shared, me, participants;
 let generateCheck = true;
 let y = 0;
 let timer = 500;
+let axeGif, woodGif, appleTreeImg, treeAreaImg, threeApplesImg;
+let gameTime = 0;
+let gameBegin = false;
+let gameOver = false;
+let screenMode = 0;
+let gameScreenMode = 4;
+let instruct = 0;
+let lastPage = 4; //count of numer of instruction pages
+let nextButton;
+let nextButtonX = 150;
+let prevButton;
+let prevButtonX = 150;
+let finButton;
+let finButtonX = 150;
+let finButtonTxt = "START GAME";
+let showButtonTemp = false;
+
+let rules = [];
 let hostLoggers = [];
 let fol_a = [];
 let fol_b = [];
@@ -12,14 +29,9 @@ let fol_c = [];
 // let br1 = [];
 // let br2 = [];
 let appleImgs = [];
-let axeGif, woodGif;
 let insGifs = [];
 let allOfTheTrees = [];
 let allOfTheChildTrees = [];
-let gameTime = 0;
-let gameBegin = false;
-let gameOver = false;
-
 let w = [];
 let h = [];
 let c = [];
@@ -29,8 +41,10 @@ let a = [];
 let s = [];
 let ls = [];
 let n = [];
-let sh = []; //home screen tree gen
+let sh = [];
+let sz = []; //home screen tree gen
 
+let bgCol = "#a7d179";
 let blue = "#25399F";
 let brown1 = "#584239";
 let brown2 = "#6C523B";
@@ -41,22 +55,7 @@ let green4 = "#76E44E";
 let red = "#F14037";
 let yellow = "#FFDD00";
 let pink = "#F0909C";
-let screenMode = 0;
-let gameScreenMode = 4;
-let instruct = 0;
-let lastPage = 5; //count of number of instruction pages
-let nextButton;
-let nextButtonX = 150;
-let prevButton;
-let prevButtonX = 150;
-let finButton;
-let finButtonX = 150;
-let finButtonTxt = "START GAME";
 
-let bgCol = "#a7d179"; //colours
-let branchCol = "#8c5c08";
-let foliageCol = "#088c0f";
-let appleCol = "red";
 let shadowCol = (rules[0] = {
   X: "X",
   F: "F",
@@ -79,6 +78,7 @@ setInterval(() => allTrees(), 30);
 setInterval(() => gameTimer(), 1000);
 setInterval(() => addLogger(), 15000);
 setInterval(() => rushScene(), 30000);
+setInterval(addFlora, floraInterval);
 
 function preload() {
   partyConnect(
@@ -93,6 +93,9 @@ function preload() {
   for (let i = 1; i < 5; i++) {
     insGifs.push(loadImage("assets/ins_" + i + ".gif"));
   }
+  appleTreeImg = loadImage("assets/appleTreeImg.png");
+  treeAreaImg = loadImage("assets/treeAreaImg.png");
+  threeApplesImg = loadImage("assets/threeApplesImg.png");
 
   for (let i = 1; i < 4; i++) {
     fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
@@ -119,10 +122,10 @@ function preload() {
 }
 function setup() {
   createCanvas(1300, 650);
-  // textAlign(CENTER, CENTER);
   imageMode(CENTER);
   textFont("Inter");
   partyToggleInfo();
+  textSize(25);
 
   background(green1); //BG CONTROL HERE
   noStroke();
@@ -176,16 +179,17 @@ function setup() {
   finButton.position(prevButtonX, height);
   finButton.mousePressed(finFn);
   for (let i = 0; i < 3; i++) {
-    w[i] = width / 2 + i * 100; //homescreen tree generation
-    h[i] = height / 2 + ((i % 2) + 1) * 100;
+    w[i] = width / 2 + i * 100 + 200; //homescreen tree generation
+    h[i] = height / 2 + ((i % 2) + 1) * 100 + 100;
     c[i] = 0;
     cm[i] = int(random(2, 5));
-    l[i] = random(150, 120);
+    l[i] = random(180, 150);
     a[i] = radians(20);
     s[i] = axiom;
     ls[i] = int(random(1, 4));
     n[i] = floor(random(0, 3));
     sh[i] = floor(random(0, 3));
+    sz[i] = 40;
   }
 }
 function mousePressed() {
@@ -249,7 +253,7 @@ function mousePressed() {
     }
   }
 }
-function recurTree(x, y, l, a, s, c, num, shape) {
+function recurTree(x, y, l, a, s, c, num, shape, size) {
   resetMatrix();
   push();
   translate(x, y);
@@ -257,22 +261,31 @@ function recurTree(x, y, l, a, s, c, num, shape) {
   for (let i = 0; i < s.length; i++) {
     let current = s.charAt(i);
     if (current == "F") {
-      fill(branchCol);
-      rect(0, 0, 5, -l);
+      fill(brown1);
+      if (c < 1) {
+        rect(0, 0, 5, -l);
+      } else {
+        rect(0, 0, 2, -l);
+      }
+      //rect(0, 0, 5, -l);
       translate(0, -l, 1);
     } else if (current == "X") {
       for (const t of participants) {
+        fill(brown1);
+        if (c < 1) {
+          rect(0, 0, 5, -l);
+        } else {
+          rect(0, 0, 2, -l);
+        }
         if (num == 0) {
-          image(fol_a[shape], 0, -l, 30, 30);
+          image(fol_a[shape], 0, -l, size, size);
         } else if (num == 1) {
-          image(fol_b[shape], 0, -l, 30, 30);
+          image(fol_b[shape], 0, -l, size, size);
         } else if (num == 2) {
-          image(fol_c[shape], 0, -l, 30, 30);
+          image(fol_c[shape], 0, -l, size, size);
         }
       }
 
-      fill(branchCol);
-      rect(0, 0, 5, -l);
       translate(0, -l, 1);
     } else if (current == "+") {
       rotate(a);
@@ -287,7 +300,7 @@ function recurTree(x, y, l, a, s, c, num, shape) {
   translate(0, 0);
   pop();
 }
-function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape) {
+function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape, size) {
   //console.log(x, y, c, cmax, l, a, s, ls);
   while (c < cmax) {
     l *= 0.5;
@@ -314,13 +327,12 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape) {
     }
     s = nextSentence;
     // createP(s);
-    recurTree(x, y, l, a, s, c, num, shape);
+    recurTree(x, y, l, a, s, c, num, shape, size);
     c++;
   }
 }
 // we need to do the thing where the drawing order is based on y position so the trees at the top are behind the ones towards the bottom
 function allTrees() {
-  // console.log(shared.gameStartChk, screenMode, gameScreenMode);
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     // console.log(shared.gameStartChk, screenMode, gameScreenMode);
     background(bgCol);
@@ -370,7 +382,8 @@ function allTrees() {
           t.sentence,
           t.lSystem,
           t.folNum,
-          t.folShape
+          t.folShape,
+          30
         );
 
         //draw the apples
@@ -393,7 +406,8 @@ function allTrees() {
             m.sentence,
             m.lSystem,
             m.folNum,
-            m.folShape
+            m.folShape,
+            20
           );
           pop();
         }
@@ -473,7 +487,7 @@ function allTrees() {
 
     //console.log((floor(int(millis())/1000)/10) % 1 == 0);
     let randint = random();
-    if (randint < 0.005) {
+    if (randint < 0.003) {
       setTimeout(growApples(), 3000);
     }
   }
@@ -520,7 +534,6 @@ function gameTimer() {
   if (gameTime >= 60) {
     if (allOfTheChildTrees.length == 0) {
       gameOver = true;
-
       screenMode = 5;
     }
   }
@@ -531,6 +544,7 @@ function growApples() {
     let treeHeight = treeHeightSum(me.branchLength, me.countMax);
 
     me.apples.push({
+      x: random(me.x - 15, me.x + 25),
       y: random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight),
       move: false,
       planted: false,
@@ -540,13 +554,13 @@ function growApples() {
       me.y -
       me.branchLength -
       me.branchLength / 2 ** (me.countMax - me.countMax / 3);
-    for (const a of me.apples) {
-      if (a.y > appleYTop) {
-        a.x = random(me.x, me.x + 25);
-      } else if (a.y < appleYTop) {
-        a.x = random(me.x - 25, me.x + 25);
-      }
-    }
+    // for (const a of me.apples) {
+    //   if (a.y > appleYTop) {
+    //     a.x = random(me.x, me.x + 25);
+    //   } else if (a.y < appleYTop) {
+    //     a.x = random(me.x - 25, me.x + 25);
+    //   }
+    // }
     // console.log(me.apples);
   }
 }
@@ -582,6 +596,10 @@ function gameState() {
 }
 function instructionScreen() {
   background(green1);
+  push();
+  rectMode(CENTER);
+  textAlign(CENTER, CENTER);
+  fill(yellow);
   switch (instruct) {
     case 0:
       //title screen
@@ -591,31 +609,74 @@ function instructionScreen() {
     case 1:
       //actual instructions start
       showButtons();
-      image(insGifs[0], width / 2, height / 2);
-      text("Page 2", 10, 30);
+      image(appleTreeImg, width / 3, 250, 300, 300);
+      text("You are an apple tree.", width / 3, 450);
+      image(insGifs[0], (width / 3) * 2, 250, 300, 300);
+      text(
+        "Click to plant yourself in the field when the game starts.",
+        (width / 3) * 2,
+        450,
+        325
+      );
       break;
     case 2:
       showButtons();
-      text("Page 3", 10, 30);
+      image(insGifs[1], width / 3, 250, 300, 300);
+      text(
+        "Apples grow on your tree. Click to pick one up and click on the ground to plant it.",
+        width / 3,
+        450,
+        360
+      );
+      image(treeAreaImg, (width / 3) * 2, 250, 300, 300);
+      text(
+        "You can only plant trees in your circle area. The area will increase as time passes.",
+        (width / 3) * 2,
+        450,
+        350
+      );
       break;
     case 3:
       showButtons();
-      text("Page 4", 10, 30);
+      image(threeApplesImg, width / 3, 250, 300, 300);
+      text(
+        "You can grow up to 3 apples on your tree at a time.",
+        width / 3,
+        450,
+        350
+      );
+      image(insGifs[2], (width / 3) * 2, 250, 300, 300);
+      text(
+        "Apples will automatically grow back after a couple of seconds.",
+        (width / 3) * 2,
+        450,
+        350
+      );
       break;
     case 4:
       showButtons();
-      text("Page 5", 10, 30);
-      break;
-    case 5:
-      showButtons();
-      text("Page 6", 10, 30);
+      image(insGifs[3], width / 3, 250, 300, 300);
+      text(
+        "There are humans running around who will cut your trees down.",
+        width / 3,
+        450,
+        350
+      );
+      image(axeGif, (width / 3) * 2, 250, 200, 200);
+      text(
+        "Grow the forest with your other tree friends and stay alive as long as you can!",
+        (width / 3) * 2,
+        450,
+        350
+      );
       break;
   }
+  pop();
 }
 function homeScreen() {
   background(brown2);
   for (let i = 0; i < 3; i++) {
-    console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
+    // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
     generateNewSentence(
       w[i],
       h[i],
@@ -626,11 +687,11 @@ function homeScreen() {
       s[i],
       ls[i],
       n[i],
-      sh[i]
+      sh[i],
+      sz[i]
     );
   }
 }
-let showButtonTemp = false;
 function readyScreen() {
   showButtons();
   background(green1);
@@ -691,7 +752,14 @@ function readyScreen() {
   } else if (shared.gameStartChk == true && me.state == "player") {
     screenMode = 4;
   } else {
-    text("game is already in session. Join as viewer", 20, 30);
+    push();
+    textAlign(CENTER);
+    textSize(40);
+    fill(yellow);
+    text("VIEWER", width / 2, 80);
+    textSize(30);
+    text("game is already in session. Join as viewer", prevButtonX / 2, 130);
+    pop();
     me.state = "viewer";
     showButtonTemp = true;
   }
@@ -725,17 +793,42 @@ function gameScreen() {
 }
 function endScreen() {
   background(red);
+  push();
+  textAlign(CENTER);
+  textSize(40);
+  fill(yellow);
+  text("WHOOP", width / 2, 80);
+  textSize(30);
+  text("You lasted " + gameTime + " mins", width / 2 - 300, 130);
+  text("Better luck next time :)", width / 2 - 300, 170);
+  pop();
+  for (let i = 0; i < 3; i++) {
+    // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
+    generateNewSentence(
+      w[i],
+      h[i],
+      c[i],
+      cm[i],
+      l[i],
+      a[i],
+      s[i],
+      ls[i],
+      n[i],
+      sh[i],
+      sz[i]
+    );
+  }
 }
 function nextFn() {
   instruct++;
-  console.log(instruct);
+  // console.log(instruct);
 }
 function prevFn() {
   instruct--;
-  console.log(instruct);
+  // console.log(instruct);
 }
 function finFn() {
-  console.log(screenMode);
+  // console.log(screenMode);
   if (screenMode == 1) {
     screenMode = 4;
   } else screenMode++;
@@ -782,8 +875,6 @@ function showButtons() {
     finButton.hide();
   }
 }
-
-setInterval(addFlora, floraInterval);
 function drawFlora() {
   // if (partyIsHost()) {
   floraArr.forEach((flora) => {
@@ -832,7 +923,7 @@ function addFlora() {
     }
   }
   // }
-  if ((floraArr.length = 111)) {
-    floraArr.splice(7, 3);
-  }
+  // if ((floraArr.length = 111)) {
+  //   floraArr.splice(7, 3);
+  // }
 }
