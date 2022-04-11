@@ -9,10 +9,11 @@ let hostLoggers = [];
 let fol_a = [];
 let fol_b = [];
 let fol_c = [];
-let br1 = [];
-let br2 = [];
+// let br1 = [];
+// let br2 = [];
 let appleImgs = [];
 let axeGif,woodGif;
+let insGifs = [];
 let allOfTheTrees = [];
 let allOfTheChildTrees = [];
 let gameTime = 0;
@@ -64,11 +65,15 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation",
-    "hweng"
+    "hw"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
+
+  for(let i=1; i<5; i++){
+    insGifs.push(loadImage("assets/ins_"+i+".gif"));
+  }
 
   for (let i = 1; i < 4; i++) {
     fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
@@ -78,12 +83,12 @@ function preload() {
     appleImgs[i - 1] = loadImage("assets/apple" + i + ".png");
   }
 
-  for (let j = 1; j < 5; j++) {
-    for (let k = 1; k < 2; k++) {
-      br1.push(loadImage(`assets/br${1}_${j}_${k}.png`));
-      br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
-    }
-  }
+  // for (let j = 1; j < 5; j++) {
+  //   for (let k = 1; k < 2; k++) {
+  //     br1.push(loadImage(`assets/br${1}_${j}_${k}.png`));
+  //     br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
+  //   }
+  // }
 
   axeGif = loadImage('assets/logger_axe.gif');
   woodGif = loadImage('assets/logger_wood.gif');
@@ -92,6 +97,7 @@ function setup() {
   createCanvas(1300, 650);
   // textAlign(CENTER, CENTER);
   imageMode(CENTER);
+  textFont('Inter');
 
   background(bgCol); //BG CONTROL HERE
   noStroke();
@@ -274,9 +280,9 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls) {
 }
 // we need to do the thing where the drawing order is based on y position so the trees at the top are behind the ones towards the bottom
 function allTrees() {
-  console.log(shared.gameStartChk, screenMode, gameScreenMode);
+  // console.log(shared.gameStartChk, screenMode, gameScreenMode);
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
-    console.log(shared.gameStartChk, screenMode, gameScreenMode);
+    // console.log(shared.gameStartChk, screenMode, gameScreenMode);
     background(bgCol);
 
     gameBegin = true;
@@ -470,7 +476,7 @@ function gameTimer() {
       gameOver = true;
     }
   }
-  console.log(gameTime, allOfTheTrees.length);
+  // console.log(gameTime, allOfTheTrees.length);
 }
 function growApples() {
   if (me.setTree == true && me.apples.length < 3) {
@@ -509,11 +515,11 @@ function gameState() {
   switch (screenMode) {
     case 0:
       instructionScreen();
-      console.log("instructions");
+      // console.log("instructions");
       break;
     case 1:
       readyScreen();
-      console.log("ready screen");
+      // console.log("ready screen");
       break;
     case 3: //i think this is a bug, it doesn't work if screenmode 2
       launchScreen();
@@ -527,15 +533,18 @@ function gameState() {
   }
 }
 function instructionScreen() {
-  background(green4);
+  background(bgCol);
   switch (instruct) {
     case 0:
+      //title screen
       showButtons();
       textSize(32);
       text("Page 1", 10, 30);
       break;
     case 1:
+      //actual instructions start
       showButtons();
+      image(insGifs[0],width/2,height/2);
       text("Page 2", 10, 30);
       break;
     case 2:
@@ -593,7 +602,7 @@ function prevFn() {
 }
 function finFn() {
   screenMode++;
-  console.log(screenMode);
+  // console.log(screenMode);
 }
 function showButtons() {
   if (screenMode == 0) {
