@@ -12,7 +12,7 @@ let fol_c = [];
 let br1 = [];
 let br2 = [];
 let appleImgs = [];
-let axeGif,woodGif;
+let axeGif, woodGif;
 let allOfTheTrees = [];
 let allOfTheChildTrees = [];
 let gameTime = 0;
@@ -32,7 +32,7 @@ let pink = "#F0909C";
 let screenMode = 0;
 let gameScreenMode = 4;
 let instruct = 0;
-let lastPage = 5; //count of numer of instruction pages
+let lastPage = 5; //count of number of instruction pages
 let nextButton;
 let nextButtonX = 150;
 let prevButton;
@@ -63,8 +63,8 @@ setInterval(() => rushScene(), 30000);
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
-    "studeg_deforestation_2",
-    "hwearng"
+    "studeg_deforestation",
+    "tm7"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -85,8 +85,13 @@ function preload() {
     }
   }
 
-  axeGif = loadImage('assets/logger_axe.gif');
-  woodGif = loadImage('assets/logger_wood.gif');
+  axeGif = loadImage("assets/logger_axe.gif");
+  woodGif = loadImage("assets/logger_wood.gif");
+  for (let x = 1; x < 7; x++) {
+    if (x < 4) bush[x - 1] = loadImage("assets/bush" + x + ".png");
+    flower[x - 1] = loadImage("assets/flower" + x + ".png");
+    rockClump[x - 1] = loadImage("assets/rockClump" + x + ".png");
+  }
 }
 function setup() {
   createCanvas(1300, 650);
@@ -278,10 +283,10 @@ function allTrees() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     //console.log(shared.gameStartChk, screenMode, gameScreenMode);
     background(bgCol);
-
+    drawFlora();
     gameBegin = true;
-    text(gameTime, width-200, 100)
-    text(allOfTheChildTrees.length, width-200, 140);
+    text(gameTime, width - 200, 100);
+    text(allOfTheChildTrees.length, width - 200, 140);
 
     if (me.state == "viewer") {
       push();
@@ -415,9 +420,9 @@ function allTrees() {
 
     shared.loggers.forEach((logger) => {
       if (!logger.woodpicked) {
-        image(axeGif, logger.x,logger.y,25,25);
+        image(axeGif, logger.x, logger.y, 25, 25);
       } else {
-        image(woodGif, logger.x,logger.y,25,25);
+        image(woodGif, logger.x, logger.y, 25, 25);
       }
     });
 
@@ -472,10 +477,8 @@ function gameTimer() {
       gameOver = true;
 
       screenMode = 5;
-
     }
   }
-  //console.log(gameTime, allOfTheTrees.length);
 }
 function growApples() {
   if (me.setTree == true && me.apples.length < 3) {
@@ -571,7 +574,6 @@ function readyScreen() {
     text("game is already in session. Join as viewer", 20, 30);
     me.state = "viewer";
   }
-
 }
 function launchScreen() {
   showButtons();
@@ -583,7 +585,13 @@ function launchScreen() {
       text("waiting for host to launch game", 20, 30);
     }
     for (let i = 0; i < participants.length; i++) {
-      image(appleImgs[me.appleShape], (width/2-(participants.length/2)*100) + 100*i, height/2, 50, 50);
+      image(
+        appleImgs[me.appleShape],
+        width / 2 - (participants.length / 2) * 100 + 100 * i,
+        height / 2,
+        50,
+        50
+      );
     }
   } else {
     screenMode = 4;
@@ -594,7 +602,7 @@ function gameScreen() {
   screenMode = 4;
   shared.gameStartChk = true; //need to set this on button click
 }
-function endScreen(){
+function endScreen() {
   background(red);
 }
 function nextFn() {
@@ -640,5 +648,65 @@ function showButtons() {
     prevButton.hide();
     nextButton.hide();
     finButton.hide();
+  }
+}
+//FLORA STUFF
+floraArr = [];
+bush = [];
+flower = [];
+rockClump = [];
+floraCount = 0;
+floraInterval = 5000;
+setInterval(addFlora, floraInterval);
+function drawFlora() {
+  // if (partyIsHost()) {
+  floraArr.forEach((flora) => {
+    if (flora.type == "flower") {
+      resizeX = 8;
+      resizeY = 8;
+    } else if (flora.type == "bush") {
+      resizeX = 20;
+      resizeY = 12;
+    } else if (flora.type == "rock") {
+      resizeX = 30;
+      resizeY = 30;
+    }
+    image(flora.url, flora.xPos, flora.yPos, resizeX, resizeY);
+  });
+  // }
+}
+function addFlora() {
+  // if (partyIsHost()) {
+  if (floraCount == 0) {
+    rockClump.forEach((e) => {
+      floraArr.push({
+        url: e,
+        type: "rock",
+        xPos: random(width - 5),
+        yPos: random(height - 5),
+      });
+    });
+    floraCount++;
+  } else {
+    let tempBush = int(random(bush.length - 1));
+    floraArr.push({
+      url: bush[tempBush],
+      type: "bush",
+      xPos: random(width - 5),
+      yPos: random(height - 5),
+    });
+    for (let i = 0; i < 2; i++) {
+      let tempF = int(random(flower.length - 1));
+      floraArr.push({
+        url: flower[tempF],
+        type: "flower",
+        xPos: random(width - 5),
+        yPos: random(height - 5),
+      });
+    }
+  }
+  // }
+  if ((floraArr.length = 111)) {
+    floraArr.splice(7, 3);
   }
 }
