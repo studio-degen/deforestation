@@ -72,25 +72,23 @@ let shadowCol = (rules[0] = {
 });
 
 //FLORA STUFF
-floraArr = [];
 bush = [];
 flower = [];
 rockClump = [];
 floraCount = 0;
-floraInterval = 5000;
 
 setInterval(() => gameState(), 30);
 setInterval(() => allTrees(), 30);
 setInterval(() => gameTimer(), 1000);
 setInterval(() => addLogger(), 15000);
 setInterval(() => rushScene(), 30000);
-setInterval(addFlora, floraInterval);
+setInterval(() => addFlora(), 5000);
 
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation_0",
-    "tm"
+    "tm1"
   );
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -167,6 +165,7 @@ function setup() {
     shared.gameStartChk = false;
     shared.gameTime = 0;
     shared.gameBegin = false;
+    shared.floraArr = [];
     instruct = 0;
     screenMode = 0;
     hostLoggers.push(
@@ -344,7 +343,6 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape, size) {
     c++;
   }
 }
-// we need to do the thing where the drawing order is based on y position so the trees at the top are behind the ones towards the bottom
 function allTrees() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     // console.log(shared.gameStartChk, screenMode, gameScreenMode);
@@ -509,43 +507,51 @@ function allTrees() {
 
     push();
     // rectMode(CENTER);
-    
-    fill(255,255,255,200);
-    rect(width-115,35,90,75);
+
+    fill(255, 255, 255, 200);
+    rect(width - 115, 35, 90, 75);
     fill(brown2);
-    text(floor(shared.gameTime/60) + ":" + floor(shared.gameTime%60), width-80, 60);
-    image(clockImg,width-100,53,20,20);
-    text(allOfTheChildTrees.length, width-80, 100);
-    image(treeCountImg,width-100,93,20,20);
+    text(
+      floor(shared.gameTime / 60) + ":" + floor(shared.gameTime % 60),
+      width - 80,
+      60
+    );
+    image(clockImg, width - 100, 53, 20, 20);
+    text(allOfTheChildTrees.length, width - 80, 100);
+    image(treeCountImg, width - 100, 93, 20, 20);
     pop();
   }
 }
 function addLogger() {
-  if (partyIsHost()) {
-    hostLoggers.push(
-      new Logger(
-        { x: random(width), y: random(height) },
-        { x: random(-6, 6), y: random(-6, 6) },
-        6
-      )
-    );
+  if (shared.gameStartChk == true && screenMode == gameScreenMode) {
+    if (partyIsHost()) {
+      hostLoggers.push(
+        new Logger(
+          { x: random(width), y: random(height) },
+          { x: random(-6, 6), y: random(-6, 6) },
+          6
+        )
+      );
+    }
   }
 }
 function rushScene() {
-  if (partyIsHost()) {
-    hostLoggers.forEach((logger) => {
-      if (logger.step < 20) {
-        logger.step += 4;
-      }
-    });
-  }
+  if (shared.gameStartChk == true && screenMode == gameScreenMode) {
+    if (partyIsHost()) {
+      hostLoggers.forEach((logger) => {
+        if (logger.step < 20) {
+          logger.step += 4;
+        }
+      });
+    }
 
-  if (me.treeArea < 400) {
-    me.treeArea += 50;
+    if (me.treeArea < 400) {
+      me.treeArea += 50;
+    }
   }
 }
 function gameTimer() {
-  if(partyIsHost()){
+  if (partyIsHost()) {
     if (shared.gameBegin && !shared.gameOver) {
       shared.gameTime++;
     }
@@ -625,7 +631,7 @@ function gameState() {
   }
 }
 function instructionScreen() {
-  nextButton.html("NEXT");
+  // nextButton.html("NEXT");
   background(green1);
   push();
   rectMode(CENTER);
@@ -705,7 +711,7 @@ function instructionScreen() {
   pop();
 }
 function homeScreen() {
-  nextButton.html("INSTRUCTIONS");
+  // nextButton.html("INSTRUCTIONS");
   background(brown2);
   for (let i = 0; i < 3; i++) {
     // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
@@ -832,7 +838,15 @@ function endScreen() {
   fill(yellow);
   text("WHOOP", width / 2, 80);
   textSize(30);
-  text("You lasted " + floor(shared.gameTime/60) + " mins and " + floor(shared.gameTime%60) + " secs", width / 2 - 300, 130);
+  text(
+    "You lasted " +
+      floor(shared.gameTime / 60) +
+      " mins and " +
+      floor(shared.gameTime % 60) +
+      " secs",
+    width / 2 - 300,
+    130
+  );
   text("Better luck next time :)", width / 2 - 300, 170);
   pop();
   for (let i = 0; i < 3; i++) {
@@ -909,54 +923,73 @@ function showButtons() {
   }
 }
 function drawFlora() {
+  let resizeX;
+  let resizeY;
   // if (partyIsHost()) {
-  floraArr.forEach((flora) => {
+  shared.floraArr.forEach((flora) => {
     if (flora.type == "flower") {
+      url = flower[flora.index];
       resizeX = 8;
       resizeY = 8;
     } else if (flora.type == "bush") {
+      url = bush[flora.index];
       resizeX = 20;
       resizeY = 12;
     } else if (flora.type == "rock") {
+      url = rockClump[flora.index];
       resizeX = 30;
       resizeY = 30;
     }
-    image(flora.url, flora.xPos, flora.yPos, resizeX, resizeY);
+    image(url, flora.xPos, flora.yPos, resizeX, resizeY);
   });
   // }
 }
 function addFlora() {
   // if (partyIsHost()) {
-  if (floraCount == 0) {
-    rockClump.forEach((e) => {
-      floraArr.push({
-        url: e,
-        type: "rock",
+  //   if (floraCount == 0) {
+  //     rockClump.forEach((e) => {
+  //       console.log(e);
+  //       shared.floraArr.push({
+  //         index: int(random(6)),
+  //         type: "rock",
+  //         xPos: random(width - 5),
+  //         yPos: random(height - 5),
+  //       });
+  //     });
+  //     floraCount++;
+  //   }
+  // }
+  // console.log(shared.floraArr);
+  if (partyIsHost()) {
+    if (floraCount == 0) {
+      rockClump.forEach((e) => {
+        shared.floraArr.push({
+          index: int(random(6)),
+          type: "rock",
+          xPos: random(width - 5),
+          yPos: random(height - 5),
+        });
+      });
+      floraCount++;
+    } else {
+      let tempBush = int(random(bush.length - 1));
+      shared.floraArr.push({
+        index: tempBush,
         xPos: random(width - 5),
         yPos: random(height - 5),
       });
-    });
-    floraCount++;
-  } else {
-    let tempBush = int(random(bush.length - 1));
-    floraArr.push({
-      url: bush[tempBush],
-      type: "bush",
-      xPos: random(width - 5),
-      yPos: random(height - 5),
-    });
-    for (let i = 0; i < 2; i++) {
-      let tempF = int(random(flower.length - 1));
-      floraArr.push({
-        url: flower[tempF],
-        type: "flower",
-        xPos: random(width - 5),
-        yPos: random(height - 5),
-      });
+      for (let i = 0; i < 2; i++) {
+        let tempF = int(random(flower.length - 1));
+        shared.floraArr.push({
+          index: tempF,
+          type: "flower",
+          xPos: random(width - 5),
+          yPos: random(height - 5),
+        });
+      }
     }
   }
-  // }
-  // if ((floraArr.length = 111)) {
-  //   floraArr.splice(7, 3);
+  // if ((shared.floraArr.length = 111)) {
+  //   shared.floraArr.splice(7, 3);
   // }
 }

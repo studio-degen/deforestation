@@ -59,7 +59,7 @@ button:active {
 	position:relative;
 	top:1px;
 }
-#texture{
+#textureOverlay{
   position:absolute;
   top:0;
   left:0;
