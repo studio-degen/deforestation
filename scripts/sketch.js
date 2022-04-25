@@ -18,13 +18,14 @@ let screenMode = 0;
 let gameScreenMode = 4;
 let instruct = 0;
 let lastPage = 4; //count of numer of instruction pages
-let nextButton;
 let nextButtonX = 150;
-let prevButton;
 let prevButtonX = 150;
 let finButton;
 let finButtonX = 150;
-let finButtonTxt = "START GAME";
+let startButton = document.getElementById("startBtn");
+let insButton = document.getElementById("insBtn");
+let nextButton = document.getElementById("nextBtn");
+let prevButton = document.getElementById("prevBtn");
 let showButtonTemp = false;
 
 let rules = [];
@@ -176,18 +177,7 @@ function setup() {
       )
     );
   }
-
-  nextButton = createButton("NEXT");
-  nextButton.position(width - nextButtonX, height);
-  nextButton.mousePressed(nextFn);
-
-  prevButton = createButton("PREVIOUS");
-  prevButton.position(prevButtonX, height);
-  prevButton.mousePressed(prevFn);
-
-  finButton = createButton(finButtonTxt);
-  finButton.position(prevButtonX, height);
-  finButton.mousePressed(finFn);
+  
   for (let i = 0; i < 3; i++) {
     w[i] = width / 2 + i * 100 + 200; //homescreen tree generation
     h[i] = height / 2 + ((i % 2) + 1) * 100 + 100;
@@ -202,6 +192,17 @@ function setup() {
     sz[i] = 40;
   }
 }
+startButton.addEventListener("click",finFn);
+insButton.addEventListener("click",function(){
+  instruct = 1;
+});
+nextButton.addEventListener("click",function(){
+  instruct++;
+});
+prevButton.addEventListener("click",function(){
+  instruct--;
+})
+
 function mousePressed() {
   if (
     shared.gameStartChk == true &&
@@ -631,7 +632,6 @@ function gameState() {
   }
 }
 function instructionScreen() {
-  // nextButton.html("NEXT");
   background(green1);
   push();
   rectMode(CENTER);
@@ -757,8 +757,8 @@ function readyScreen() {
       push();
       textAlign(CENTER);
       textSize(40);
-      fill(yellow);
-      text("HOST", width / 2, 80);
+      fill("#F14037");
+      text("You are the HOST", width / 2, 80);
       pop();
       push();
       textSize(30);
@@ -883,43 +883,50 @@ function finFn() {
 function showButtons() {
   if (screenMode == 0) {
     if (instruct == 0) {
-      prevButton.position(prevButtonX, height - 50);
-      prevButton.hide();
-      nextButton.position(width / 2 - 2 * nextButtonX, height / 2);
-      nextButton.show();
-      finButton.position(
-        width / 2 - 2 * finButtonX,
-        height / 2 - +finButtonX / 2
-      );
-      finButton.show();
+      //title screen
+      nextButton.style.visibility = "hidden"
+      prevButton.style.visibility = "hidden";
+      startButton.style.bottom = "auto";
+      startButton.style.top = "30vh";
+      startButton.style.left = "25vw";
+      startButton.style.right = "auto";
+      startButton.style.visibility = "visible"
+      insButton.style.visibility = "visible";
     } else if (instruct == lastPage) {
-      prevButton.position(prevButtonX, height - 50);
-      prevButton.show();
-      nextButton.position(width - nextButtonX, height - 50);
-      nextButton.hide();
-      finButton.position(width - finButtonX, height - 50);
-      finButton.show();
+      //instructions last page
+      insButton.style.visibility = "hidden";
+      nextButton.style.visibility = "hidden"
+      startButton.style.bottom = "15vh";
+      startButton.style.top = "auto";
+      startButton.style.left = "auto";
+      startButton.style.right = "10vw";
+      startButton.style.visibility = "visible"
+      prevButton.style.visibility = "visible";
     } else {
-      prevButton.position(prevButtonX, height - 50);
-      prevButton.show();
-      nextButton.position(width - nextButtonX, height - 50);
-      nextButton.show();
-      finButton.position(prevButtonX, height);
-      finButton.hide();
+      //instructions pages
+      startButton.style.visibility = "hidden"
+      insButton.style.visibility = "hidden";
+      nextButton.style.visibility = "visible"
+      prevButton.style.visibility = "visible";
     }
   } else if (screenMode == 1 && showButtonTemp == true) {
-    prevButton.hide();
-    nextButton.hide();
-    finButton.position(prevButtonX, height - 50);
-    finButton.show();
+    //ready screen
+    nextButton.style.visibility = "hidden"
+    prevButton.style.visibility = "hidden";
+    insButton.style.visibility = "hidden";
+    startButton.style.bottom = "30vh";
+    startButton.style.top = "auto";
+    startButton.style.left = "auto";
+    startButton.style.right = "45vw";
   } else if (screenMode > 1) {
-    prevButton.hide();
-    nextButton.hide();
-    finButton.hide();
+    nextButton.style.visibility = "hidden"
+    prevButton.style.visibility = "hidden";
+    insButton.style.visibility = "hidden";
+    startButton.style.visibility = "hidden"
   } else {
-    prevButton.hide();
-    nextButton.hide();
-    finButton.hide();
+    nextButton.style.visibility = "hidden"
+    prevButton.style.visibility = "hidden";
+    insButton.style.visibility = "hidden";
   }
 }
 function drawFlora() {

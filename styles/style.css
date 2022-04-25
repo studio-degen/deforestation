@@ -30,6 +30,9 @@ canvas {
   bottom: 0;
   top:0;
 }
+#defaultCanvas0{
+  z-index: 0;
+}
 h1 {
   font-size: 50px;
   margin: 10px auto 10px auto;
@@ -42,7 +45,8 @@ button {
   -webkit-border-radius: 4;
   -moz-border-radius: 4;
   border-radius: 4px;
-  font-family: Inter;
+  font-family: 'Inter';
+  font-weight: 600;
   color: var(--green1);
   font-size: 13px;
   background: var(--yellow);
@@ -50,14 +54,33 @@ button {
   border: solid var(--green1) 2px;
   text-decoration: none;
 }
-
 button:hover {
   opacity: 80%;
-  text-decoration: none;
 }
-button:active {
-	position:relative;
-	top:1px;
+.gameBtn{
+  position: absolute;
+  z-index: 2;
+}
+#startBtn{
+  top: 30vh;
+  left: 25vw;
+  background-color: var(--red);
+  color: var(--brown1);
+  border: solid var(--brown1) 2px;
+}
+#insBtn{
+  top: 40vh;
+  left: 25vw;
+}
+#nextBtn{
+  bottom:15vh;
+  right: 10vw;
+  visibility: hidden;
+}
+#prevBtn{
+  bottom:15vh;
+  left: 10vw;
+  visibility: hidden;
 }
 #textureOverlay{
   position:absolute;
