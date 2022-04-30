@@ -506,15 +506,19 @@ function allTrees() {
       setTimeout(growApples(), 3000);
     }
 
+    // stats
     push();
-    // rectMode(CENTER);
-
     fill(255, 255, 255, 200);
-    rect(width - 115, 35, 90, 75);
+    rect(width - 117, 35, 90, 75, 5);
     fill(brown2);
+    let mins = floor(shared.gameTime / 60);
+    let secs = floor(shared.gameTime % 60);
+    if(secs < 10){
+      secs = '0' + secs;
+    };
     text(
-      floor(shared.gameTime / 60) + ":" + floor(shared.gameTime % 60),
-      width - 80,
+      mins + ":" + secs,
+      width - 79,
       60
     );
     image(clockImg, width - 100, 53, 20, 20);
