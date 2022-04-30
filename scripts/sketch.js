@@ -884,49 +884,51 @@ function showButtons() {
   if (screenMode == 0) {
     if (instruct == 0) {
       //title screen
-      nextButton.style.visibility = "hidden"
+      nextButton.style.visibility = "hidden";
       prevButton.style.visibility = "hidden";
       startButton.style.bottom = "auto";
       startButton.style.top = "30vh";
       startButton.style.left = "25vw";
       startButton.style.right = "auto";
-      startButton.style.visibility = "visible"
+      startButton.style.visibility = "visible";
       insButton.style.visibility = "visible";
     } else if (instruct == lastPage) {
       //instructions last page
       insButton.style.visibility = "hidden";
-      nextButton.style.visibility = "hidden"
+      nextButton.style.visibility = "hidden";
       startButton.style.bottom = "15vh";
       startButton.style.top = "auto";
       startButton.style.left = "auto";
       startButton.style.right = "10vw";
-      startButton.style.visibility = "visible"
+      startButton.style.visibility = "visible";
       prevButton.style.visibility = "visible";
     } else {
       //instructions pages
       startButton.style.visibility = "hidden"
       insButton.style.visibility = "hidden";
-      nextButton.style.visibility = "visible"
+      nextButton.style.visibility = "visible";
       prevButton.style.visibility = "visible";
     }
   } else if (screenMode == 1 && showButtonTemp == true) {
     //ready screen
-    nextButton.style.visibility = "hidden"
+    nextButton.style.visibility = "hidden";
     prevButton.style.visibility = "hidden";
     insButton.style.visibility = "hidden";
     startButton.style.bottom = "30vh";
     startButton.style.top = "auto";
     startButton.style.left = "auto";
     startButton.style.right = "45vw";
+    startButton.style.visibility = "visible";
   } else if (screenMode > 1) {
-    nextButton.style.visibility = "hidden"
+    nextButton.style.visibility = "hidden";
     prevButton.style.visibility = "hidden";
     insButton.style.visibility = "hidden";
-    startButton.style.visibility = "hidden"
+    startButton.style.visibility = "hidden";
   } else {
     nextButton.style.visibility = "hidden"
     prevButton.style.visibility = "hidden";
     insButton.style.visibility = "hidden";
+    startButton.style.visibility = "hidden";
   }
 }
 function drawFlora() {
