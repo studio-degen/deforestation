@@ -29,7 +29,6 @@ let prevButton = document.getElementById("prevBtn");
 let showButtonTemp = false;
 
 let rules = [];
-let hostLoggers = [];
 let fol_a = [];
 let fol_b = [];
 let fol_c = [];
@@ -160,21 +159,25 @@ function setup() {
 
   me.apples = [];
   me.myTrees = [];
-  shared.loggers = [];
   shared.gameOver = false;
   if (partyIsHost()) {
+    shared.loggers = [];
     shared.gameStartChk = false;
     shared.gameTime = 0;
     shared.gameBegin = false;
     shared.floraArr = [];
     instruct = 0;
     screenMode = 0;
-    hostLoggers.push(
-      new Logger(
-        { x: random(width), y: random(height) },
-        { x: random(-6, 6), y: random(-6, 6) },
-        6
-      )
+    shared.loggers.push(
+      {
+      pos: { x: random(width), y: random(height) },
+      d: { x: random(-6, 6), y: random(-6, 6) },
+      step: 6,
+      cutting: false,
+      woodpicked: false,
+      cutTime: 10,
+      destrand: random()
+      }
     );
   }
   
@@ -443,10 +446,8 @@ function allTrees() {
     }
 
     if (partyIsHost()) {
-      shared.loggers = [];
-      hostLoggers.forEach((logger) => {
-        logger.move();
-        //logger.show();
+      shared.loggers.forEach((logger) => {
+        stepLogger(logger);
 
         participants.forEach((p) => {
           if (!logger.woodpicked) {
@@ -484,23 +485,18 @@ function allTrees() {
           }
         });
 
-        shared.loggers.push({
-          x: logger.pos.x,
-          y: logger.pos.y,
-          woodpicked: logger.woodpicked,
-        });
       });
     }
 
     shared.loggers.forEach((logger) => {
       if (!logger.woodpicked) {
-        image(axeGif, logger.x, logger.y, 25, 25);
+        image(axeGif, logger.pos.x, logger.pos.y, 25, 25);
       } else {
-        image(woodGif, logger.x, logger.y, 25, 25);
+        image(woodGif, logger.pos.x, logger.pos.y, 25, 25);
       }
     });
 
-    //console.log((floor(int(millis())/1000)/10) % 1 == 0);
+    //console.log(shared.loggers);
     let randint = random();
     if (randint < 0.003) {
       setTimeout(growApples(), 3000);
@@ -527,23 +523,71 @@ function allTrees() {
     pop();
   }
 }
+
+function stepLogger(o) {
+  let rand = random();
+  if(!o.cutting){
+      if(!o.woodpicked){
+          if(rand < 0.3){
+              o.d.x = lerp(o.d.x, random(-o.step, o.step), 0.2);
+              o.d.y = lerp(o.d.y, random(-o.step, o.step), 0.2);
+          }
+      }else{
+          if(o.destrand > 0.75){
+              o.d.x = lerp(o.d.x, random(-7, 7), 0.2);
+              o.d.y = lerp(o.d.y, random(0, o.step), 0.2);
+          }else if(o.destrand < 0.75 && o.destrand > 0.5){
+              o.d.x = lerp(o.d.x, random(0, o.step), 0.2);
+              o.d.y = lerp(o.d.y, random(-7, 7), 0.2);;
+          }else if(o.destrand < 0.5 && o.destrand > 0.25){
+              o.d.x = lerp(o.d.x, random(-o.step, 0), 0.2);
+              o.d.y = lerp(o.d.y, random(-7, 7), 0.2);;
+          }else{
+              o.d.x = lerp(o.d.x, random(-7, 7), 0.2);;
+              o.d.y = lerp(o.d.y, random(-o.step, 0), 0.2);
+          }
+      }
+  }
+
+
+  o.pos.x += o.d.x;
+  o.pos.y += o.d.y;
+
+  
+  if(o.pos.x < -20 || o.pos.x > width+20){
+      o.d.x = -o.d.x;
+      o.woodpicked = false;
+  }
+
+  if(o.pos.y < -20 || o.pos.y > height+20){
+      o.d.y = -o.d.y;
+      o.woodpicked = false;
+  }
+}
+
+
 function addLogger() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     if (partyIsHost()) {
-      hostLoggers.push(
-        new Logger(
-          { x: random(width), y: random(height) },
-          { x: random(-6, 6), y: random(-6, 6) },
-          6
-        )
+      shared.loggers.push(
+        {
+        pos: { x: random(width), y: random(height) },
+        d: { x: random(-6, 6), y: random(-6, 6) },
+        step: 6,
+        cutting: false,
+        woodpicked: false,
+        cutTime: 10,
+        destrand: random()
+        }
       );
     }
   }
 }
+
 function rushScene() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     if (partyIsHost()) {
-      hostLoggers.forEach((logger) => {
+      shared.loggers.forEach((logger) => {
         if (logger.step < 20) {
           logger.step += 4;
         }
