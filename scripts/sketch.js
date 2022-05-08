@@ -167,6 +167,7 @@ function setup() {
       d: { x: random(-6, 6), y: random(-6, 6) },
       step: 6,
       cutting: false,
+      target: null,
       woodpicked: false,
       cutTime: 10,
       destrand: random(),
@@ -460,8 +461,12 @@ function allTrees() {
                 //console.log('close');
                 logger.cutting = true;
                 if (treeDist > 10) {
-                  logger.d.x = lerp(logger.d.x, (t.x - logger.pos.x) / 20, 0.2);
-                  logger.d.y = lerp(logger.d.y, (t.y - logger.pos.y) / 20, 0.2);
+                  if(logger.target == null){
+                    logger.target = t;
+                  }else{
+                    logger.d.x = lerp(logger.d.x, (logger.target.x - logger.pos.x) / 20, 0.2);
+                    logger.d.y = lerp(logger.d.y, (logger.target.y - logger.pos.y) / 20, 0.2);
+                  }
                 } else if (treeDist < 10) {
                   //console.log('hit');
                   // if(int(millis())/1000 % 60){
@@ -472,6 +477,7 @@ function allTrees() {
                   //logger.d.x = 0;
                   //logger.d.y = 0;
                   p.myTrees.splice(index, 1);
+                  logger.target = null;
                   //console.log(p.myTrees)
                   logger.woodpicked = true;
                   //}
@@ -582,11 +588,14 @@ function rushScene() {
           logger.step += 4;
         }
       });
+
+      for(const p of participants){
+        if (p.treeArea < 400) {
+          p.treeArea += 50;
+        }
+      }
     }
 
-    if (me.treeArea < 400) {
-      me.treeArea += 50;
-    }
   }
 }
 function gameTimer() {
