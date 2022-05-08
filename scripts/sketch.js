@@ -1,3 +1,10 @@
+const room = new URLSearchParams(location.search).get("room");
+console.log("room:", room);
+
+if (room) {
+  document.getElementById("room").value = room;
+}
+
 let axiom = "X"; //starting point
 let treeGrowInterval = 1000;
 let shared, me, participants;
@@ -15,7 +22,7 @@ let axeGif,
 //let gameBegin = false;
 //let gameOver = false;
 let screenMode = 0;
-let gameScreenMode = 4;
+let gameScreenMode = 4; //screen to go to to begin game
 let instruct = 0;
 let lastPage = 4; //count of numer of instruction pages
 let nextButtonX = 150;
@@ -29,7 +36,6 @@ let prevButton = document.getElementById("prevBtn");
 let showButtonTemp = false;
 
 let rules = [];
-let hostLoggers = [];
 let fol_a = [];
 let fol_b = [];
 let fol_c = [];
@@ -63,12 +69,13 @@ let red = "#F14037";
 let yellow = "#FFDD00";
 let pink = "#F0909C";
 
+//3 types of l-systems rule systems
 let shadowCol = (rules[0] = {
   X: "X",
   F: "F",
-  X1: "F[+X]F[-X]+X",
-  X2: "F[+X][-X]FX",
-  X3: "F-[[X]+X]+F[+FX]-X",
+  X1: "F[+X]F[-X]+X", //method 1
+  X2: "F[+X][-X]FX", //method 2
+  X3: "F-[[X]+X]+F[+FX]-X", //method 3
   F1: "FF",
 });
 
@@ -88,54 +95,47 @@ setInterval(() => addFlora(), 5000);
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
-    "studeg_deforestation_0",
-    "tm1"
+    "studeg_deforestation_1",
+    room
   );
+  //declaring party variables
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
-
+  //loading all image assets
   for (let i = 1; i < 5; i++) {
     insGifs.push(loadImage("assets/ins_" + i + ".gif"));
+  }
+  for (let i = 1; i < 4; i++) {
+    fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
+    fol_b[i - 1] = loadImage("assets/fol_b_" + i + ".png");
+    fol_c[i - 1] = loadImage("assets/fol_c_" + i + ".png");
+    appleImgs[i - 1] = loadImage("assets/apple" + i + ".png");
+  }
+  for (let x = 1; x < 7; x++) {
+    if (x < 4) bush[x - 1] = loadImage("assets/bush" + x + ".png");
+    flower[x - 1] = loadImage("assets/flower" + x + ".png");
+    rockClump[x - 1] = loadImage("assets/rockClump" + x + ".png");
   }
   appleTreeImg = loadImage("assets/appleTreeImg.png");
   treeAreaImg = loadImage("assets/treeAreaImg.png");
   threeApplesImg = loadImage("assets/threeApplesImg.png");
   clockImg = loadImage("assets/clock.png");
   treeCountImg = loadImage("assets/treeCount.png");
-
-  for (let i = 1; i < 4; i++) {
-    fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
-    fol_b[i - 1] = loadImage("assets/fol_b_" + i + ".png");
-    fol_c[i - 1] = loadImage("assets/fol_c_" + i + ".png");
-
-    appleImgs[i - 1] = loadImage("assets/apple" + i + ".png");
-  }
-
-  // for (let j = 1; j < 5; j++) {
-  //   for (let k = 1; k < 2; k++) {
-  //     br1.push(loadImage(`assets/br${1}_${j}_${k}.png`));
-  //     br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
-  //   }
-  // }
-
   axeGif = loadImage("assets/logger_axe.gif");
   woodGif = loadImage("assets/logger_wood.gif");
-  for (let x = 1; x < 7; x++) {
-    if (x < 4) bush[x - 1] = loadImage("assets/bush" + x + ".png");
-    flower[x - 1] = loadImage("assets/flower" + x + ".png");
-    rockClump[x - 1] = loadImage("assets/rockClump" + x + ".png");
-  }
 }
 function setup() {
   createCanvas(1300, 650);
+  background(green1); //BG CONTROL HERE
+
+  partyToggleInfo(); //hide party info panel
+
   imageMode(CENTER);
   textFont("Inter");
-  partyToggleInfo();
   textSize(25);
-
-  background(green1); //BG CONTROL HERE
   noStroke();
+
   me.x = 0;
   me.y = 0;
   me.count = 0;
@@ -149,37 +149,41 @@ function setup() {
   me.folShape = floor(random(0, 3));
   me.appleShape = floor(random(0, 3));
   me.branchCol = floor(random(0, 2));
-  me.branchShape = {
-    a: floor(random(0, 2)),
-    b: floor(random(2, 4)),
-    c: floor(random(4, 6)),
-    d: floor(random(6, 8)),
-    e: floor(random(8, 10)),
-  };
+  // me.branchShape = {
+  //   a: floor(random(0, 2)),
+  //   b: floor(random(2, 4)),
+  //   c: floor(random(4, 6)),
+  //   d: floor(random(6, 8)),
+  //   e: floor(random(8, 10)),
+  // };
   //a is the biggest/lowest level branch
 
   me.apples = [];
   me.myTrees = [];
-  shared.loggers = [];
-  shared.gameOver = false;
   if (partyIsHost()) {
-    shared.gameStartChk = false;
+    shared.loggers = [];
+    shared.gameOver = false; //gameOver used where?
+    shared.gameStartChk = false; //gameStartChk used in mousePressed so player can place trees only after game starts
     shared.gameTime = 0;
     shared.gameBegin = false;
     shared.floraArr = [];
     instruct = 0;
     screenMode = 0;
-    hostLoggers.push(
-      new Logger(
-        { x: random(width), y: random(height) },
-        { x: random(-6, 6), y: random(-6, 6) },
-        6
-      )
-    );
+    shared.loggers.push({
+      pos: { x: random(width), y: random(height) },
+      d: { x: random(-6, 6), y: random(-6, 6) },
+      step: 6,
+      cutting: false,
+      target: null,
+      woodpicked: false,
+      cutTime: 10,
+      destrand: random(),
+    });
   }
-  
+
+  //homescreen tree generation
   for (let i = 0; i < 3; i++) {
-    w[i] = width / 2 + i * 100 + 200; //homescreen tree generation
+    w[i] = width / 2 + i * 100 + 200;
     h[i] = height / 2 + ((i % 2) + 1) * 100 + 100;
     c[i] = 0;
     cm[i] = int(random(2, 5));
@@ -192,16 +196,22 @@ function setup() {
     sz[i] = 40;
   }
 }
-startButton.addEventListener("click",finFn);
-insButton.addEventListener("click",function(){
+//All button event listener functions
+startButton.addEventListener("click", function () {
+  if (screenMode == 1) {
+    //check to jumps to game from instructions page
+    screenMode = 4; // game screen = 4
+  } else screenMode++;
+});
+insButton.addEventListener("click", function () {
   instruct = 1;
 });
-nextButton.addEventListener("click",function(){
+nextButton.addEventListener("click", function () {
   instruct++;
 });
-prevButton.addEventListener("click",function(){
+prevButton.addEventListener("click", function () {
   instruct--;
-})
+});
 
 function mousePressed() {
   if (
@@ -210,13 +220,14 @@ function mousePressed() {
     me.state == "player"
   ) {
     if (me.setTree == false) {
-      me.x = mouseX;
+      //setting main tree initial values
+      me.x = mouseX; //location
       me.y = mouseY;
-      me.count = 0;
-      me.countMax = int(random(2, 5));
+      me.count = 0; //start of l-system
+      me.countMax = int(random(2, 5)); //end of l-system i.e. setting 2 to 4 branch levels
       me.branchLength = random(130, 70);
       me.angle = radians(20);
-      me.sentence = axiom;
+      me.sentence = axiom; //axiom = X
       me.lSystem = int(random(1, 4));
       me.setTree = true;
       for (let i = 0; i < 3; i++) {
@@ -443,10 +454,8 @@ function allTrees() {
     }
 
     if (partyIsHost()) {
-      shared.loggers = [];
-      hostLoggers.forEach((logger) => {
-        logger.move();
-        //logger.show();
+      shared.loggers.forEach((logger) => {
+        stepLogger(logger);
 
         participants.forEach((p) => {
           if (!logger.woodpicked) {
@@ -459,8 +468,12 @@ function allTrees() {
                 //console.log('close');
                 logger.cutting = true;
                 if (treeDist > 10) {
-                  logger.d.x = lerp(logger.d.x, (t.x - logger.pos.x) / 20, 0.2);
-                  logger.d.y = lerp(logger.d.y, (t.y - logger.pos.y) / 20, 0.2);
+                  if(logger.target == null){
+                    logger.target = t;
+                  }else{
+                    logger.d.x = lerp(logger.d.x, (logger.target.x - logger.pos.x) / 20, 0.2);
+                    logger.d.y = lerp(logger.d.y, (logger.target.y - logger.pos.y) / 20, 0.2);
+                  }
                 } else if (treeDist < 10) {
                   //console.log('hit');
                   // if(int(millis())/1000 % 60){
@@ -471,6 +484,7 @@ function allTrees() {
                   //logger.d.x = 0;
                   //logger.d.y = 0;
                   p.myTrees.splice(index, 1);
+                  logger.target = null;
                   //console.log(p.myTrees)
                   logger.woodpicked = true;
                   //}
@@ -483,24 +497,18 @@ function allTrees() {
             });
           }
         });
-
-        shared.loggers.push({
-          x: logger.pos.x,
-          y: logger.pos.y,
-          woodpicked: logger.woodpicked,
-        });
       });
     }
 
     shared.loggers.forEach((logger) => {
       if (!logger.woodpicked) {
-        image(axeGif, logger.x, logger.y, 25, 25);
+        image(axeGif, logger.pos.x, logger.pos.y, 25, 25);
       } else {
-        image(woodGif, logger.x, logger.y, 25, 25);
+        image(woodGif, logger.pos.x, logger.pos.y, 25, 25);
       }
     });
 
-    //console.log((floor(int(millis())/1000)/10) % 1 == 0);
+    //console.log(shared.loggers);
     let randint = random();
     if (randint < 0.003) {
       setTimeout(growApples(), 3000);
@@ -513,46 +521,88 @@ function allTrees() {
     fill(brown2);
     let mins = floor(shared.gameTime / 60);
     let secs = floor(shared.gameTime % 60);
-    if(secs < 10){
-      secs = '0' + secs;
-    };
-    text(
-      mins + ":" + secs,
-      width - 79,
-      60
-    );
+    if (secs < 10) {
+      secs = "0" + secs;
+    }
+    text(mins + ":" + secs, width - 79, 60);
     image(clockImg, width - 100, 53, 20, 20);
     text(allOfTheChildTrees.length, width - 80, 100);
     image(treeCountImg, width - 100, 93, 20, 20);
     pop();
   }
 }
+
+function stepLogger(o) {
+  let rand = random();
+  if (!o.cutting) {
+    if (!o.woodpicked) {
+      if (rand < 0.3) {
+        o.d.x = lerp(o.d.x, random(-o.step, o.step), 0.2);
+        o.d.y = lerp(o.d.y, random(-o.step, o.step), 0.2);
+      }
+    } else {
+      if (o.destrand > 0.75) {
+        o.d.x = lerp(o.d.x, random(-7, 7), 0.2);
+        o.d.y = lerp(o.d.y, random(0, o.step), 0.2);
+      } else if (o.destrand < 0.75 && o.destrand > 0.5) {
+        o.d.x = lerp(o.d.x, random(0, o.step), 0.2);
+        o.d.y = lerp(o.d.y, random(-7, 7), 0.2);
+      } else if (o.destrand < 0.5 && o.destrand > 0.25) {
+        o.d.x = lerp(o.d.x, random(-o.step, 0), 0.2);
+        o.d.y = lerp(o.d.y, random(-7, 7), 0.2);
+      } else {
+        o.d.x = lerp(o.d.x, random(-7, 7), 0.2);
+        o.d.y = lerp(o.d.y, random(-o.step, 0), 0.2);
+      }
+    }
+  }
+
+  o.pos.x += o.d.x;
+  o.pos.y += o.d.y;
+
+  if (o.pos.x < -20 || o.pos.x > width + 20) {
+    o.d.x = -o.d.x;
+    o.woodpicked = false;
+  }
+
+  if (o.pos.y < -20 || o.pos.y > height + 20) {
+    o.d.y = -o.d.y;
+    o.woodpicked = false;
+  }
+}
+
 function addLogger() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     if (partyIsHost()) {
-      hostLoggers.push(
-        new Logger(
-          { x: random(width), y: random(height) },
-          { x: random(-6, 6), y: random(-6, 6) },
-          6
-        )
-      );
+      shared.loggers.push({
+        pos: { x: random(width), y: random(height) },
+        d: { x: random(-6, 6), y: random(-6, 6) },
+        step: 6,
+        cutting: false,
+        woodpicked: false,
+        cutTime: 10,
+        destrand: random(),
+      });
     }
   }
 }
+
 function rushScene() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     if (partyIsHost()) {
-      hostLoggers.forEach((logger) => {
+      shared.loggers.forEach((logger) => {
         if (logger.step < 20) {
           logger.step += 4;
         }
       });
+
+      for(const p of participants){
+        if (p.treeArea < 400) {
+          p.treeArea += 50;
+        }
+      }
     }
 
-    if (me.treeArea < 400) {
-      me.treeArea += 50;
-    }
   }
 }
 function gameTimer() {
@@ -792,7 +842,7 @@ function readyScreen() {
       pop();
     }
   } else if (shared.gameStartChk == true && me.state == "player") {
-    screenMode = 4;
+    screenMode = gameScreenMode;
   } else {
     push();
     textAlign(CENTER);
@@ -826,13 +876,13 @@ function launchScreen() {
       );
     }
   } else {
-    screenMode = 4;
+    screenMode = gameScreenMode;
   }
 }
 function gameScreen() {
   showButtons();
-  screenMode = 4;
-  shared.gameStartChk = true; //need to set this on button click
+  screenMode = gameScreenMode;
+  shared.gameStartChk = true; //set to true = game mechanic conditions become true
 }
 function endScreen() {
   background(red);
@@ -878,12 +928,6 @@ function prevFn() {
   instruct--;
   // console.log(instruct);
 }
-function finFn() {
-  // console.log(screenMode);
-  if (screenMode == 1) {
-    screenMode = 4;
-  } else screenMode++;
-}
 function showButtons() {
   if (screenMode == 0) {
     if (instruct == 0) {
@@ -908,7 +952,7 @@ function showButtons() {
       prevButton.style.visibility = "visible";
     } else {
       //instructions pages
-      startButton.style.visibility = "hidden"
+      startButton.style.visibility = "hidden";
       insButton.style.visibility = "hidden";
       nextButton.style.visibility = "visible";
       prevButton.style.visibility = "visible";
@@ -929,7 +973,7 @@ function showButtons() {
     insButton.style.visibility = "hidden";
     startButton.style.visibility = "hidden";
   } else {
-    nextButton.style.visibility = "hidden"
+    nextButton.style.visibility = "hidden";
     prevButton.style.visibility = "hidden";
     insButton.style.visibility = "hidden";
     startButton.style.visibility = "hidden";
