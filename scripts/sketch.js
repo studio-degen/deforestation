@@ -1,3 +1,10 @@
+const room = new URLSearchParams(location.search).get("room");
+console.log("room:", room);
+
+if (room) {
+  document.getElementById("room").value = room;
+}
+
 let axiom = "X"; //starting point
 let treeGrowInterval = 1000;
 let shared, me, participants;
@@ -89,7 +96,7 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation_1",
-    "tm1"
+    room
   );
   //declaring party variables
   shared = partyLoadShared("globals");
