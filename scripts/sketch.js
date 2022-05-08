@@ -62,12 +62,13 @@ let red = "#F14037";
 let yellow = "#FFDD00";
 let pink = "#F0909C";
 
+//3 types of l-systems rule systems
 let shadowCol = (rules[0] = {
   X: "X",
   F: "F",
-  X1: "F[+X]F[-X]+X",
-  X2: "F[+X][-X]FX",
-  X3: "F-[[X]+X]+F[+FX]-X",
+  X1: "F[+X]F[-X]+X", //method 1
+  X2: "F[+X][-X]FX", //method 2
+  X3: "F-[[X]+X]+F[+FX]-X", //method 3
   F1: "FF",
 });
 
@@ -87,54 +88,47 @@ setInterval(() => addFlora(), 5000);
 function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
-    "studeg_deforestation_0",
+    "studeg_deforestation_1",
     "tm1"
   );
+  //declaring party variables
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
-
+  //loading all image assets
   for (let i = 1; i < 5; i++) {
     insGifs.push(loadImage("assets/ins_" + i + ".gif"));
+  }
+  for (let i = 1; i < 4; i++) {
+    fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
+    fol_b[i - 1] = loadImage("assets/fol_b_" + i + ".png");
+    fol_c[i - 1] = loadImage("assets/fol_c_" + i + ".png");
+    appleImgs[i - 1] = loadImage("assets/apple" + i + ".png");
+  }
+  for (let x = 1; x < 7; x++) {
+    if (x < 4) bush[x - 1] = loadImage("assets/bush" + x + ".png");
+    flower[x - 1] = loadImage("assets/flower" + x + ".png");
+    rockClump[x - 1] = loadImage("assets/rockClump" + x + ".png");
   }
   appleTreeImg = loadImage("assets/appleTreeImg.png");
   treeAreaImg = loadImage("assets/treeAreaImg.png");
   threeApplesImg = loadImage("assets/threeApplesImg.png");
   clockImg = loadImage("assets/clock.png");
   treeCountImg = loadImage("assets/treeCount.png");
-
-  for (let i = 1; i < 4; i++) {
-    fol_a[i - 1] = loadImage("assets/fol_a_" + i + ".png");
-    fol_b[i - 1] = loadImage("assets/fol_b_" + i + ".png");
-    fol_c[i - 1] = loadImage("assets/fol_c_" + i + ".png");
-
-    appleImgs[i - 1] = loadImage("assets/apple" + i + ".png");
-  }
-
-  // for (let j = 1; j < 5; j++) {
-  //   for (let k = 1; k < 2; k++) {
-  //     br1.push(loadImage(`assets/br${1}_${j}_${k}.png`));
-  //     br2.push(loadImage(`assets/br${2}_${j}_${k}.png`));
-  //   }
-  // }
-
   axeGif = loadImage("assets/logger_axe.gif");
   woodGif = loadImage("assets/logger_wood.gif");
-  for (let x = 1; x < 7; x++) {
-    if (x < 4) bush[x - 1] = loadImage("assets/bush" + x + ".png");
-    flower[x - 1] = loadImage("assets/flower" + x + ".png");
-    rockClump[x - 1] = loadImage("assets/rockClump" + x + ".png");
-  }
 }
 function setup() {
   createCanvas(1300, 650);
+  background(green1); //BG CONTROL HERE
+
+  partyToggleInfo(); //hide party info panel
+
   imageMode(CENTER);
   textFont("Inter");
-  partyToggleInfo();
   textSize(25);
-
-  background(green1); //BG CONTROL HERE
   noStroke();
+
   me.x = 0;
   me.y = 0;
   me.count = 0;
@@ -148,41 +142,40 @@ function setup() {
   me.folShape = floor(random(0, 3));
   me.appleShape = floor(random(0, 3));
   me.branchCol = floor(random(0, 2));
-  me.branchShape = {
-    a: floor(random(0, 2)),
-    b: floor(random(2, 4)),
-    c: floor(random(4, 6)),
-    d: floor(random(6, 8)),
-    e: floor(random(8, 10)),
-  };
+  // me.branchShape = {
+  //   a: floor(random(0, 2)),
+  //   b: floor(random(2, 4)),
+  //   c: floor(random(4, 6)),
+  //   d: floor(random(6, 8)),
+  //   e: floor(random(8, 10)),
+  // };
   //a is the biggest/lowest level branch
 
   me.apples = [];
   me.myTrees = [];
-  shared.gameOver = false;
   if (partyIsHost()) {
     shared.loggers = [];
-    shared.gameStartChk = false;
+    shared.gameOver = false; //gameOver used where?
+    shared.gameStartChk = false; //gameStartChk used where?
     shared.gameTime = 0;
     shared.gameBegin = false;
     shared.floraArr = [];
     instruct = 0;
     screenMode = 0;
-    shared.loggers.push(
-      {
+    shared.loggers.push({
       pos: { x: random(width), y: random(height) },
       d: { x: random(-6, 6), y: random(-6, 6) },
       step: 6,
       cutting: false,
       woodpicked: false,
       cutTime: 10,
-      destrand: random()
-      }
-    );
+      destrand: random(),
+    });
   }
-  
+
+  //homescreen tree generation
   for (let i = 0; i < 3; i++) {
-    w[i] = width / 2 + i * 100 + 200; //homescreen tree generation
+    w[i] = width / 2 + i * 100 + 200;
     h[i] = height / 2 + ((i % 2) + 1) * 100 + 100;
     c[i] = 0;
     cm[i] = int(random(2, 5));
@@ -195,16 +188,17 @@ function setup() {
     sz[i] = 40;
   }
 }
-startButton.addEventListener("click",finFn);
-insButton.addEventListener("click",function(){
+//All button event listener functions
+startButton.addEventListener("click", finFn); //instruct =?
+insButton.addEventListener("click", function () {
   instruct = 1;
 });
-nextButton.addEventListener("click",function(){
+nextButton.addEventListener("click", function () {
   instruct++;
 });
-prevButton.addEventListener("click",function(){
+prevButton.addEventListener("click", function () {
   instruct--;
-})
+});
 
 function mousePressed() {
   if (
@@ -484,7 +478,6 @@ function allTrees() {
             });
           }
         });
-
       });
     }
 
@@ -509,14 +502,10 @@ function allTrees() {
     fill(brown2);
     let mins = floor(shared.gameTime / 60);
     let secs = floor(shared.gameTime % 60);
-    if(secs < 10){
-      secs = '0' + secs;
-    };
-    text(
-      mins + ":" + secs,
-      width - 79,
-      60
-    );
+    if (secs < 10) {
+      secs = "0" + secs;
+    }
+    text(mins + ":" + secs, width - 79, 60);
     image(clockImg, width - 100, 53, 20, 20);
     text(allOfTheChildTrees.length, width - 80, 100);
     image(treeCountImg, width - 100, 93, 20, 20);
@@ -526,60 +515,55 @@ function allTrees() {
 
 function stepLogger(o) {
   let rand = random();
-  if(!o.cutting){
-      if(!o.woodpicked){
-          if(rand < 0.3){
-              o.d.x = lerp(o.d.x, random(-o.step, o.step), 0.2);
-              o.d.y = lerp(o.d.y, random(-o.step, o.step), 0.2);
-          }
-      }else{
-          if(o.destrand > 0.75){
-              o.d.x = lerp(o.d.x, random(-7, 7), 0.2);
-              o.d.y = lerp(o.d.y, random(0, o.step), 0.2);
-          }else if(o.destrand < 0.75 && o.destrand > 0.5){
-              o.d.x = lerp(o.d.x, random(0, o.step), 0.2);
-              o.d.y = lerp(o.d.y, random(-7, 7), 0.2);;
-          }else if(o.destrand < 0.5 && o.destrand > 0.25){
-              o.d.x = lerp(o.d.x, random(-o.step, 0), 0.2);
-              o.d.y = lerp(o.d.y, random(-7, 7), 0.2);;
-          }else{
-              o.d.x = lerp(o.d.x, random(-7, 7), 0.2);;
-              o.d.y = lerp(o.d.y, random(-o.step, 0), 0.2);
-          }
+  if (!o.cutting) {
+    if (!o.woodpicked) {
+      if (rand < 0.3) {
+        o.d.x = lerp(o.d.x, random(-o.step, o.step), 0.2);
+        o.d.y = lerp(o.d.y, random(-o.step, o.step), 0.2);
       }
+    } else {
+      if (o.destrand > 0.75) {
+        o.d.x = lerp(o.d.x, random(-7, 7), 0.2);
+        o.d.y = lerp(o.d.y, random(0, o.step), 0.2);
+      } else if (o.destrand < 0.75 && o.destrand > 0.5) {
+        o.d.x = lerp(o.d.x, random(0, o.step), 0.2);
+        o.d.y = lerp(o.d.y, random(-7, 7), 0.2);
+      } else if (o.destrand < 0.5 && o.destrand > 0.25) {
+        o.d.x = lerp(o.d.x, random(-o.step, 0), 0.2);
+        o.d.y = lerp(o.d.y, random(-7, 7), 0.2);
+      } else {
+        o.d.x = lerp(o.d.x, random(-7, 7), 0.2);
+        o.d.y = lerp(o.d.y, random(-o.step, 0), 0.2);
+      }
+    }
   }
-
 
   o.pos.x += o.d.x;
   o.pos.y += o.d.y;
 
-  
-  if(o.pos.x < -20 || o.pos.x > width+20){
-      o.d.x = -o.d.x;
-      o.woodpicked = false;
+  if (o.pos.x < -20 || o.pos.x > width + 20) {
+    o.d.x = -o.d.x;
+    o.woodpicked = false;
   }
 
-  if(o.pos.y < -20 || o.pos.y > height+20){
-      o.d.y = -o.d.y;
-      o.woodpicked = false;
+  if (o.pos.y < -20 || o.pos.y > height + 20) {
+    o.d.y = -o.d.y;
+    o.woodpicked = false;
   }
 }
-
 
 function addLogger() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     if (partyIsHost()) {
-      shared.loggers.push(
-        {
+      shared.loggers.push({
         pos: { x: random(width), y: random(height) },
         d: { x: random(-6, 6), y: random(-6, 6) },
         step: 6,
         cutting: false,
         woodpicked: false,
         cutTime: 10,
-        destrand: random()
-        }
-      );
+        destrand: random(),
+      });
     }
   }
 }
@@ -952,7 +936,7 @@ function showButtons() {
       prevButton.style.visibility = "visible";
     } else {
       //instructions pages
-      startButton.style.visibility = "hidden"
+      startButton.style.visibility = "hidden";
       insButton.style.visibility = "hidden";
       nextButton.style.visibility = "visible";
       prevButton.style.visibility = "visible";
@@ -973,7 +957,7 @@ function showButtons() {
     insButton.style.visibility = "hidden";
     startButton.style.visibility = "hidden";
   } else {
-    nextButton.style.visibility = "hidden"
+    nextButton.style.visibility = "hidden";
     prevButton.style.visibility = "hidden";
     insButton.style.visibility = "hidden";
     startButton.style.visibility = "hidden";
