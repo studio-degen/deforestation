@@ -15,7 +15,7 @@ let axeGif,
 //let gameBegin = false;
 //let gameOver = false;
 let screenMode = 0;
-let gameScreenMode = 4;
+let gameScreenMode = 4; //screen to go to to begin game
 let instruct = 0;
 let lastPage = 4; //count of numer of instruction pages
 let nextButtonX = 150;
@@ -156,7 +156,7 @@ function setup() {
   if (partyIsHost()) {
     shared.loggers = [];
     shared.gameOver = false; //gameOver used where?
-    shared.gameStartChk = false; //gameStartChk used where?
+    shared.gameStartChk = false; //gameStartChk used in mousePressed so player can place trees only after game starts
     shared.gameTime = 0;
     shared.gameBegin = false;
     shared.floraArr = [];
@@ -189,7 +189,12 @@ function setup() {
   }
 }
 //All button event listener functions
-startButton.addEventListener("click", finFn); //instruct =?
+startButton.addEventListener("click", function () {
+  if (screenMode == 1) {
+    //check to jumps to game from instructions page
+    screenMode = 4; // game screen = 4
+  } else screenMode++;
+});
 insButton.addEventListener("click", function () {
   instruct = 1;
 });
@@ -207,13 +212,14 @@ function mousePressed() {
     me.state == "player"
   ) {
     if (me.setTree == false) {
-      me.x = mouseX;
+      //setting main tree initial values
+      me.x = mouseX; //location
       me.y = mouseY;
-      me.count = 0;
-      me.countMax = int(random(2, 5));
+      me.count = 0; //start of l-system
+      me.countMax = int(random(2, 5)); //end of l-system i.e. setting 2 to 4 branch levels
       me.branchLength = random(130, 70);
       me.angle = radians(20);
-      me.sentence = axiom;
+      me.sentence = axiom; //axiom = X
       me.lSystem = int(random(1, 4));
       me.setTree = true;
       for (let i = 0; i < 3; i++) {
@@ -820,7 +826,7 @@ function readyScreen() {
       pop();
     }
   } else if (shared.gameStartChk == true && me.state == "player") {
-    screenMode = 4;
+    screenMode = gameScreenMode;
   } else {
     push();
     textAlign(CENTER);
@@ -854,13 +860,13 @@ function launchScreen() {
       );
     }
   } else {
-    screenMode = 4;
+    screenMode = gameScreenMode;
   }
 }
 function gameScreen() {
   showButtons();
-  screenMode = 4;
-  shared.gameStartChk = true; //need to set this on button click
+  screenMode = gameScreenMode;
+  shared.gameStartChk = true; //set to true = game mechanic conditions become true
 }
 function endScreen() {
   background(red);
@@ -905,12 +911,6 @@ function nextFn() {
 function prevFn() {
   instruct--;
   // console.log(instruct);
-}
-function finFn() {
-  // console.log(screenMode);
-  if (screenMode == 1) {
-    screenMode = 4;
-  } else screenMode++;
 }
 function showButtons() {
   if (screenMode == 0) {
