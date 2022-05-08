@@ -78,6 +78,9 @@ flower = [];
 rockClump = [];
 floraCount = 0;
 
+//test
+let myTrees = 0;
+
 setInterval(() => gameState(), 30);
 setInterval(() => allTrees(), 30);
 setInterval(() => gameTimer(), 1000);
@@ -89,7 +92,7 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation_1",
-    "tm1"
+    "tm2"
   );
   //declaring party variables
   shared = partyLoadShared("globals");
@@ -142,17 +145,9 @@ function setup() {
   me.folShape = floor(random(0, 3));
   me.appleShape = floor(random(0, 3));
   me.branchCol = floor(random(0, 2));
-  // me.branchShape = {
-  //   a: floor(random(0, 2)),
-  //   b: floor(random(2, 4)),
-  //   c: floor(random(4, 6)),
-  //   d: floor(random(6, 8)),
-  //   e: floor(random(8, 10)),
-  // };
-  //a is the biggest/lowest level branch
-
   me.apples = [];
   me.myTrees = [];
+  me.plantTree = false;
   if (partyIsHost()) {
     shared.loggers = [];
     shared.gameOver = false; //gameOver used where?
@@ -205,13 +200,14 @@ nextButton.addEventListener("click", function () {
 prevButton.addEventListener("click", function () {
   instruct--;
 });
-
+//mousePressed + clicked functions
 function mousePressed() {
   if (
     shared.gameStartChk == true &&
     screenMode == gameScreenMode &&
     me.state == "player"
   ) {
+    // console.log(me.apples.length, me.myTrees);
     if (me.setTree == false) {
       //setting main tree initial values
       me.x = mouseX; //location
@@ -223,51 +219,103 @@ function mousePressed() {
       me.sentence = axiom; //axiom = X
       me.lSystem = int(random(1, 4));
       me.setTree = true;
+      me.apples = []; //test;
+      me.myTrees = []; //test
+      // me.plantTree = "false";
       for (let i = 0; i < 3; i++) {
         growApples();
       }
-    } else {
-      for (let i = 0; i < me.apples.length; i++) {
-        let appleDist = dist(mouseX, mouseY, me.apples[i].x, me.apples[i].y);
-        if (
-          appleDist <= 5 &&
-          me.apples[i].move == false &&
-          me.apples[i].planted == false
-        ) {
-          me.apples[i].move = true;
+    } else if (me.setTree == true) {
+      me.apples.forEach((a, i) => {
+        if (a.move == false) {
+          checkMouseDist(a); //checks if mouse is close enough to move the apple
+        } else if (a.move == true) {
+          me.plantTree = placeApple(a, i); //
+          console.log(me.plantTree, myTrees);
+          console.log("planting tree now");
+          // makeChildTree();
+          // myTrees.push({
+          //   x: mouseX,
+          //   y: mouseY,
+          // });
+          if (me.plantTree == "true") {
+            myTrees = mouseX;
+          }
         }
-        let areaDistX = dist(mouseX, 0, me.x, 0);
-        let areaDistY = dist(0, mouseY, 0, me.y);
-        if (
-          me.apples[i].move == true &&
-          areaDistX <= me.treeArea / 2 &&
-          areaDistY <= me.branchLength / 2
-        ) {
-          me.apples[i].move = false;
-          me.apples[i].planted = true;
-          me.apples.splice(i, 1);
-          me.myTrees.push({
-            x: mouseX,
-            y: mouseY,
-            count: 0,
-            countMax: int(random(1, 3)),
-            branchLength: random(40, 20),
-            angle: radians(20),
-            sentence: axiom,
-            lSystem: int(random(1, 4)),
-            setTree: true,
-            folNum: floor(random(0, 3)),
-            folShape: floor(random(0, 3)),
-          });
-
-          // adding apples back at a slower pace?
-          //this runs as soon as the mouse is clicked and then creates the delay instead of delaying first and then creating an apple
-          //setTimeout(growApples(), 5000);
-        }
+      });
+      if (me.plantTree == "true") {
+        me.myTrees.push(myTrees);
+        console.log("my tree: ", me.myTrees);
+        // me.plantTree = "false";
       }
+      // console.log(me.plantTree);
+      // if (me.plantTree == "true") {
+      //   console.log("planting tree now");
+      //   makeChildTree();
+      // }
+      // makeChildTree();
     }
   }
 }
+//mousePressed related functions start
+function growApples() {
+  if (me.apples.length < 3) {
+    let treeHeight = treeHeightSum(me.branchLength, me.countMax);
+    me.apples.push({
+      x: random(me.x - 15, me.x + 25),
+      y: random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight),
+      move: false,
+    });
+  }
+}
+function treeHeightSum(length, countMax) {
+  let sum = length;
+  let temp = length;
+  for (let i = 1; i < countMax; i++) {
+    temp /= 2;
+    sum += temp;
+  }
+  return sum;
+}
+function checkMouseDist(apple) {
+  let appleDist = dist(mouseX, mouseY, apple.x, apple.y);
+  if (appleDist <= 5) {
+    // check if mouse is within apple picking up range
+    apple.move = true;
+  }
+}
+function placeApple(apple, index) {
+  let areaDistX = dist(mouseX, 0, me.x, 0); //treee "shadow" dimensions
+  let areaDistY = dist(0, mouseY, 0, me.y);
+  if (
+    areaDistX <= me.treeArea / 2 &&
+    areaDistY <= me.branchLength / 2 //check to plant within the tree's "shadow" radius
+  ) {
+    apple.move = false;
+    me.apples.splice(index, 1); //remove this apple from array
+    return "true";
+  }
+}
+function makeChildTree() {
+  console.log("planting tree inside");
+  console.log(me.myTrees);
+  me.myTrees.push({
+    x: mouseX,
+    y: mouseY,
+    // count: 0,
+    // countMax: int(random(1, 3)),
+    // branchLength: random(40, 20),
+    // angle: radians(20),
+    // sentence: axiom,
+    // lSystem: int(random(1, 4)),
+    // setTree: true,
+    // folNum: floor(random(0, 3)),
+    // folShape: floor(random(0, 3)),
+  });
+  plantTree = "false";
+}
+//mousePressed related functions end
+
 function recurTree(x, y, l, a, s, c, num, shape, size) {
   resetMatrix();
   push();
@@ -461,11 +509,19 @@ function allTrees() {
                 //console.log('close');
                 logger.cutting = true;
                 if (treeDist > 10) {
-                  if(logger.target == null){
+                  if (logger.target == null) {
                     logger.target = t;
-                  }else{
-                    logger.d.x = lerp(logger.d.x, (logger.target.x - logger.pos.x) / 20, 0.2);
-                    logger.d.y = lerp(logger.d.y, (logger.target.y - logger.pos.y) / 20, 0.2);
+                  } else {
+                    logger.d.x = lerp(
+                      logger.d.x,
+                      (logger.target.x - logger.pos.x) / 20,
+                      0.2
+                    );
+                    logger.d.y = lerp(
+                      logger.d.y,
+                      (logger.target.y - logger.pos.y) / 20,
+                      0.2
+                    );
                   }
                 } else if (treeDist < 10) {
                   //console.log('hit');
@@ -524,7 +580,6 @@ function allTrees() {
     pop();
   }
 }
-
 function stepLogger(o) {
   let rand = random();
   if (!o.cutting) {
@@ -563,7 +618,6 @@ function stepLogger(o) {
     o.woodpicked = false;
   }
 }
-
 function addLogger() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     if (partyIsHost()) {
@@ -579,7 +633,6 @@ function addLogger() {
     }
   }
 }
-
 function rushScene() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     if (partyIsHost()) {
@@ -589,13 +642,12 @@ function rushScene() {
         }
       });
 
-      for(const p of participants){
+      for (const p of participants) {
         if (p.treeArea < 400) {
           p.treeArea += 50;
         }
       }
     }
-
   }
 }
 function gameTimer() {
@@ -623,40 +675,6 @@ function gameTimer() {
   }
   // console.log(gameTime, allOfTheTrees.length);
 }
-function growApples() {
-  if (me.setTree == true && me.apples.length < 3) {
-    let treeHeight = treeHeightSum(me.branchLength, me.countMax);
-
-    me.apples.push({
-      x: random(me.x - 15, me.x + 25),
-      y: random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight),
-      move: false,
-      planted: false,
-    });
-
-    let appleYTop =
-      me.y -
-      me.branchLength -
-      me.branchLength / 2 ** (me.countMax - me.countMax / 3);
-    // for (const a of me.apples) {
-    //   if (a.y > appleYTop) {
-    //     a.x = random(me.x, me.x + 25);
-    //   } else if (a.y < appleYTop) {
-    //     a.x = random(me.x - 25, me.x + 25);
-    //   }
-    // }
-    // console.log(me.apples);
-  }
-}
-function treeHeightSum(length, countMax) {
-  let sum = length;
-  let temp = length;
-  for (let i = 1; i < countMax; i++) {
-    temp /= 2;
-    sum += temp;
-  }
-  return sum;
-}
 function gameState() {
   switch (screenMode) {
     case 0:
@@ -679,7 +697,7 @@ function gameState() {
   }
 }
 function instructionScreen() {
-  background(green1);
+  // background(green1);
   push();
   rectMode(CENTER);
   textAlign(CENTER, CENTER);
@@ -759,7 +777,7 @@ function instructionScreen() {
 }
 function homeScreen() {
   // nextButton.html("INSTRUCTIONS");
-  background(brown2);
+  // background(brown2);
   for (let i = 0; i < 3; i++) {
     // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
     generateNewSentence(
@@ -779,7 +797,7 @@ function homeScreen() {
 }
 function readyScreen() {
   showButtons();
-  background(green1);
+  // background(green1);
   if (shared.gameStartChk == false) {
     me.state = "player";
     for (let i = 0; i < participants.length; i++) {
@@ -852,7 +870,7 @@ function readyScreen() {
 }
 function launchScreen() {
   showButtons();
-  background(green1);
+  // background(green1);
   if (shared.gameStartChk == false) {
     if (partyIsHost()) {
       text("click to launch game", 20, 30);
