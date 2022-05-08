@@ -1,3 +1,10 @@
+const room = new URLSearchParams(location.search).get("room");
+console.log("room:", room);
+
+if (room) {
+  document.getElementById("room").value = room;
+}
+
 let axiom = "X"; //starting point
 let treeGrowInterval = 1000;
 let shared, me, participants;
@@ -17,7 +24,7 @@ let axeGif,
 let screenMode = 0;
 let gameScreenMode = 4; //screen to go to to begin game
 let instruct = 0;
-let lastPage = 4; //count of numer of instruction pages
+let lastPage = 6; //count of numer of instruction pages
 let nextButtonX = 150;
 let prevButtonX = 150;
 let finButton;
@@ -92,14 +99,14 @@ function preload() {
   partyConnect(
     "wss://deepstream-server-1.herokuapp.com",
     "studeg_deforestation_1",
-    "tm2"
+    room
   );
   //declaring party variables
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
   //loading all image assets
-  for (let i = 1; i < 5; i++) {
+  for (let i = 1; i < 7; i++) {
     insGifs.push(loadImage("assets/ins_" + i + ".gif"));
   }
   for (let i = 1; i < 4; i++) {
@@ -195,7 +202,11 @@ insButton.addEventListener("click", function () {
   instruct = 1;
 });
 nextButton.addEventListener("click", function () {
-  instruct++;
+  if (instruct < 6) {
+    instruct++;
+  } else if (instruct == 6) {
+    instruct = 0;
+  }
 });
 prevButton.addEventListener("click", function () {
   instruct--;
@@ -697,11 +708,18 @@ function gameState() {
   }
 }
 function instructionScreen() {
-  // background(green1);
+  background(brown2);
+
   push();
   rectMode(CENTER);
   textAlign(CENTER, CENTER);
+  fill(bgCol);
+  // strokeWeight(3);
+  // stroke(yellow);
+  rect(width / 2, 275, 500, 350);
+  noStroke();
   fill(yellow);
+
   switch (instruct) {
     case 0:
       //title screen
@@ -711,65 +729,62 @@ function instructionScreen() {
     case 1:
       //actual instructions start
       showButtons();
-      image(appleTreeImg, width / 3, 250, 300, 300);
-      text("You are an apple tree.", width / 3, 450);
-      image(insGifs[0], (width / 3) * 2, 250, 300, 300);
+      image(insGifs[0], width / 2, 275, 300, 300);
       text(
-        "Click to plant yourself in the field when the game starts.",
-        (width / 3) * 2,
-        450,
-        325
+        "You are a tree. Click to plant yourself in the field when the game starts.",
+        width / 2,
+        500,
+        450
       );
       break;
     case 2:
       showButtons();
-      image(insGifs[1], width / 3, 250, 300, 300);
+      image(insGifs[1], width / 2, 275, 300, 300);
       text(
         "Apples grow on your tree. Click to pick one up and click on the ground to plant it.",
-        width / 3,
-        450,
-        360
-      );
-      image(treeAreaImg, (width / 3) * 2, 250, 300, 300);
-      text(
-        "You can only plant trees in your circle area. The area will increase as time passes.",
-        (width / 3) * 2,
-        450,
-        350
+        width / 2,
+        500,
+        500
       );
       break;
     case 3:
       showButtons();
-      image(threeApplesImg, width / 3, 250, 300, 300);
+      image(insGifs[2], width / 2, 275, 300, 300);
       text(
-        "You can grow up to 3 apples on your tree at a time.",
-        width / 3,
-        450,
-        350
-      );
-      image(insGifs[2], (width / 3) * 2, 250, 300, 300);
-      text(
-        "Apples will automatically grow back after a couple of seconds.",
-        (width / 3) * 2,
-        450,
-        350
+        "You can only plant trees in your circle. The area will increase as time passes.",
+        width / 2,
+        500,
+        475
       );
       break;
     case 4:
       showButtons();
-      image(insGifs[3], width / 3, 250, 300, 300);
+      image(insGifs[3], width / 2, 275, 300, 300);
       text(
-        "There are humans running around who will cut your trees down.",
-        width / 3,
-        450,
-        350
+        "Apples will automatically grow back over time. You can have up to 3 at once.",
+        width / 2,
+        500,
+        500
       );
-      image(axeGif, (width / 3) * 2, 250, 200, 200);
+      break;
+    case 5:
+      showButtons();
+      image(insGifs[4], width / 2, 275, 350, 350);
+      text(
+        "There are loggers running around who will cut your trees down.",
+        width / 2,
+        500,
+        500
+      );
+      break;
+    case 6:
+      showButtons();
+      image(insGifs[5], width / 2, 275, 350, 350);
       text(
         "Grow the forest with your other tree friends and stay alive as long as you can!",
-        (width / 3) * 2,
-        450,
-        350
+        width / 2,
+        500,
+        500
       );
       break;
   }
@@ -954,12 +969,12 @@ function showButtons() {
     } else if (instruct == lastPage) {
       //instructions last page
       insButton.style.visibility = "hidden";
-      nextButton.style.visibility = "hidden";
-      startButton.style.bottom = "15vh";
-      startButton.style.top = "auto";
-      startButton.style.left = "auto";
-      startButton.style.right = "10vw";
-      startButton.style.visibility = "visible";
+      startButton.style.visibility = "hidden";
+      nextButton.style.backgroundColor = "var(--red)";
+      nextButton.style.color = "var(--brown1)";
+      nextButton.style.border = "solid var(--brown1) 2px";
+      nextButton.innerHTML = "PLAY!";
+      nextButton.style.visibility = "visible";
       prevButton.style.visibility = "visible";
     } else {
       //instructions pages

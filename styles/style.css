@@ -73,13 +73,13 @@ button:hover {
   left: 25vw;
 }
 #nextBtn{
-  bottom:15vh;
-  right: 10vw;
+  bottom:20vh;
+  right: 20vw;
   visibility: hidden;
 }
 #prevBtn{
-  bottom:15vh;
-  left: 10vw;
+  bottom:20vh;
+  left: 20vw;
   visibility: hidden;
 }
 #textureOverlay{
