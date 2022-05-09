@@ -238,31 +238,34 @@ function mousePressed() {
       me.apples.forEach((a, i) => {
         if (a.move == false) {
           checkMouseDist(a); //checks if mouse is close enough to move the apple
-        } else if (a.move == true) {
+        } else {
+          console.log("planting tree now");
+          console.log("make child tree");
+          if (me.plantTree == "true") {
+            myTrees = mouseX;
+          }
           me.plantTree = placeApple(a, i); //
           console.log(me.plantTree, myTrees);
-          console.log("planting tree now");
+
           // makeChildTree();
           // myTrees.push({
           //   x: mouseX,
           //   y: mouseY,
           // });
-          if (me.plantTree == "true") {
-            myTrees = mouseX;
-          }
         }
       });
       if (me.plantTree == "true") {
         me.myTrees.push(myTrees);
+
         console.log("my tree: ", me.myTrees);
         // me.plantTree = "false";
       }
       // console.log(me.plantTree);
       // if (me.plantTree == "true") {
       //   console.log("planting tree now");
-      //   makeChildTree();
+      // makeChildTree();
       // }
-      makeChildTree();
+      // makeChildTree();
     }
   }
 }
@@ -301,13 +304,12 @@ function placeApple(apple, index) {
     areaDistY <= me.branchLength / 2 //check to plant within the tree's "shadow" radius
   ) {
     apple.move = false;
-    me.apples.splice(index, 1); //remove this apple from array
+    // me.apples.splice(index, 1); //remove this apple from array
     return "true";
   }
 }
 function makeChildTree() {
   console.log("planting tree inside");
-  console.log(me.myTrees);
   me.myTrees.push({
     x: mouseX,
     y: mouseY,
@@ -321,7 +323,8 @@ function makeChildTree() {
     // folNum: floor(random(0, 3)),
     // folShape: floor(random(0, 3)),
   });
-  plantTree = "false";
+  console.log(me.myTrees);
+  //plantTree = "false";
 }
 //mousePressed related functions end
 
