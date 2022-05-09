@@ -87,9 +87,6 @@ flower = [];
 rockClump = [];
 floraCount = 0;
 
-//test
-let myTrees = 0;
-
 setInterval(() => gameState(), 30);
 setInterval(() => allTrees(), 30);
 setInterval(() => gameTimer(), 1000);
@@ -151,8 +148,8 @@ function setup() {
   me.appleShape = floor(random(0, 3));
   me.branchCol = floor(random(0, 2));
   me.apples = [];
-  me.myTrees = [];
-  me.plantTree = false;
+  me.trees = [];
+  me.readyToPlant = false;
   if (partyIsHost()) {
     shared.loggers = [];
     shared.gameOver = false; //gameOver used where?
@@ -216,7 +213,7 @@ function mousePressed() {
     screenMode == gameScreenMode &&
     me.state == "player"
   ) {
-    // console.log(me.apples.length, me.myTrees);
+    // console.log(me.apples.length, me.trees);
     if (me.setTree == false) {
       //setting main tree initial values
       me.x = mouseX; //location
@@ -229,43 +226,32 @@ function mousePressed() {
       me.lSystem = int(random(1, 4));
       me.setTree = true;
       me.apples = []; //test;
-      me.myTrees = []; //test
-      // me.plantTree = "false";
+      me.trees = []; //test
+      me.readyToPlant = false;
       for (let i = 0; i < 3; i++) {
         growApples();
       }
     } else if (me.setTree == true) {
       me.apples.forEach((a, i) => {
-        if (a.move == false) {
+        if (a.isDragged == false) {
           checkMouseDist(a); //checks if mouse is close enough to move the apple
         } else {
-          console.log("planting tree now");
-          console.log("make child tree");
-          if (me.plantTree == "true") {
-            myTrees = mouseX;
+          let tempBound = checkBoundary(); //check if apple area of tree
+          if (tempBound) {
+            me.readyToPlant = removeApple(a, i);
           }
-          me.plantTree = placeApple(a, i); //
-          console.log(me.plantTree, myTrees);
-
-          // makeChildTree();
-          // myTrees.push({
-          //   x: mouseX,
-          //   y: mouseY,
-          // });
+          if (me.readyToPlant == true) {
+            console.log(me.readyToPlant, "make child tree"); //logging as true
+            makeChildTree(); //rewrites first element instead of pushing
+          }
         }
       });
-      if (me.plantTree == "true") {
-        me.myTrees.push(myTrees);
-
-        console.log("my tree: ", me.myTrees);
-        // me.plantTree = "false";
-      }
-      // console.log(me.plantTree);
-      // if (me.plantTree == "true") {
-      //   console.log("planting tree now");
-      // makeChildTree();
+      // console.log(me.readyToPlant); //logging as false despite being set to true within the if else loop
+      // if (me.readyToPlant == true) {
+      //   console.log("make child tree");
+      //   makeChildTree();
       // }
-      // makeChildTree();
+      //makeChildTree();
     }
   }
 }
@@ -276,7 +262,7 @@ function growApples() {
     me.apples.push({
       x: random(me.x - 15, me.x + 25),
       y: random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight),
-      move: false,
+      isDragged: false,
     });
   }
 }
@@ -293,24 +279,27 @@ function checkMouseDist(apple) {
   let appleDist = dist(mouseX, mouseY, apple.x, apple.y);
   if (appleDist <= 5) {
     // check if mouse is within apple picking up range
-    apple.move = true;
+    apple.isDragged = true;
   }
 }
-function placeApple(apple, index) {
-  let areaDistX = dist(mouseX, 0, me.x, 0); //treee "shadow" dimensions
-  let areaDistY = dist(0, mouseY, 0, me.y);
+function checkBoundary() {
+  let xLen = abs(mouseX - me.x); //treee planting area dimensions
+  let yLen = abs(mouseY - me.y);
   if (
-    areaDistX <= me.treeArea / 2 &&
-    areaDistY <= me.branchLength / 2 //check to plant within the tree's "shadow" radius
+    xLen <= me.treeArea / 2 &&
+    yLen <= me.branchLength / 2 //check to plant within the tree's planting area radius
   ) {
-    apple.move = false;
-    // me.apples.splice(index, 1); //remove this apple from array
-    return "true";
+    return true;
   }
+}
+function removeApple(apple, index) {
+  apple.isDragged = false;
+  me.apples.splice(index, 1); //remove this apple from array
+  return true; //
 }
 function makeChildTree() {
   console.log("planting tree inside");
-  me.myTrees.push({
+  me.trees.push({
     x: mouseX,
     y: mouseY,
     // count: 0,
@@ -323,8 +312,8 @@ function makeChildTree() {
     // folNum: floor(random(0, 3)),
     // folShape: floor(random(0, 3)),
   });
-  console.log(me.myTrees);
-  //plantTree = "false";
+  console.log(me.trees);
+  //readyToPlant = "false";
 }
 //mousePressed related functions end
 
@@ -467,13 +456,13 @@ function allTrees() {
 
         //draw the apples
         for (const a of t.apples) {
-          if (a.move == true) {
+          if (a.isDragged == true) {
             a.x = mouseX;
             a.y = mouseY;
           }
           image(appleImgs[t.appleShape], a.x, a.y, 12, 12);
         }
-        for (const m of t.myTrees) {
+        for (const m of t.trees) {
           push();
           generateNewSentence(
             m.x,
@@ -512,10 +501,10 @@ function allTrees() {
 
         participants.forEach((p) => {
           if (!logger.woodpicked) {
-            //console.log(p.myTrees);
+            //console.log(p.trees);
 
             let treeDist;
-            p.myTrees.forEach((t, index) => {
+            p.trees.forEach((t, index) => {
               treeDist = dist(logger.pos.x, logger.pos.y, t.x, t.y);
               if (treeDist < 30) {
                 //console.log('close');
@@ -544,9 +533,9 @@ function allTrees() {
                   //if(logger.cutTime == 0){
                   //logger.d.x = 0;
                   //logger.d.y = 0;
-                  p.myTrees.splice(index, 1);
+                  p.trees.splice(index, 1);
                   logger.target = null;
-                  //console.log(p.myTrees)
+                  //console.log(p.trees)
                   logger.woodpicked = true;
                   //}
                   setTimeout(() => {
@@ -673,7 +662,7 @@ function gameTimer() {
   allOfTheChildTrees = [];
   participants.forEach((p) => {
     allOfTheTrees.push("tree");
-    p.myTrees.forEach((mt) => {
+    p.trees.forEach((mt) => {
       allOfTheTrees.push("tree");
       allOfTheChildTrees.push("tree");
     });
