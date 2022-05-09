@@ -214,7 +214,7 @@ function mousePressed() {
     me.state == "player"
   ) {
     // console.log(me.apples.length, me.trees);
-    if (me.setTree == false) {
+    if (me.setTree === false) {
       //setting main tree initial values
       me.x = mouseX; //location
       me.y = mouseY;
@@ -226,24 +226,25 @@ function mousePressed() {
       me.lSystem = int(random(1, 4));
       me.setTree = true;
       me.apples = []; //test;
-      me.trees = []; //test
+      // me.trees = []; //test
       me.isPlantingReady = false; //sets to true when apple is removed and tree needs to be placed
       for (let i = 0; i < 3; i++) {
         growApples();
       }
-    } else if (me.setTree == true) {
+    } else {
       me.apples.forEach((a, i) => {
-        if (a.isDragged == false) {
-          checkMouseDist(a); //checks if mouse is close enough to move the apple
-        } else {
+        console.log(me.trees);
+        if (a.isDragged) {
           let tempBound = checkBoundary(); //check if apple area of tree
           if (tempBound) {
             me.isPlantingReady = removeApple(a, i);
           }
-          if (me.isPlantingReady == true) {
+          if (me.isPlantingReady) {
             console.log(me.isPlantingReady, "make child tree"); //logging as true
             makeChildTree(); //rewrites first element instead of pushing
           }
+        } else {
+          checkMouseDist(a); //checks if mouse is close enough to move the apple
         }
       });
       // console.log(me.isPlantingReady); //logging as false despite being set to true within the if else loop
@@ -313,6 +314,7 @@ function makeChildTree() {
     // folShape: floor(random(0, 3)),
   });
   console.log(me.trees);
+
   //isPlantingReady = "false";
 }
 //mousePressed related functions end
