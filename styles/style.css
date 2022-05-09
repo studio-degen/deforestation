@@ -41,6 +41,19 @@ h1 {
   z-index:5;
   pointer-events: none;
 }
+input{
+  -webkit-border-radius: 4;
+  -moz-border-radius: 4;
+  border-radius: 4px;
+  font-family: 'Inter';
+  font-weight: 600;
+  color: var(--green1);
+  font-size: 13px;
+  background: var(--yellow);
+  padding: 10px 15px;
+  border: solid var(--green1) 2px;
+  text-decoration: none;
+  }
 button {
   -webkit-border-radius: 4;
   -moz-border-radius: 4;
@@ -61,16 +74,30 @@ button:hover {
   position: absolute;
   z-index: 2;
 }
-#startBtn{
+#roomBtn{
   top: 30vh;
-  left: 25vw;
+  left: 35vw;
+  background-color: var(--yellow);
+  color: var(--brown1);
+  border: solid var(--brown1) 2px;
+}
+#room{
+  top: 30vh;
+  left: 45vw;
+  background-color: var(--yellow);
+  color: var(--brown1);
+  border: solid var(--brown1) 2px;
+}
+#startBtn{
+  top: 40vh;
+  left: 35vw;
   background-color: var(--red);
   color: var(--brown1);
   border: solid var(--brown1) 2px;
 }
 #insBtn{
-  top: 40vh;
-  left: 25vw;
+  top: 50vh;
+  left: 35vw;
 }
 #nextBtn{
   bottom:20vh;

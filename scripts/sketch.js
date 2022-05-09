@@ -30,6 +30,8 @@ let prevButtonX = 150;
 let finButton;
 let finButtonX = 150;
 let startButton = document.getElementById("startBtn");
+let roomButton = document.getElementById("roomBtn");
+let roomEntry = document.getElementById("room");
 let insButton = document.getElementById("insBtn");
 let nextButton = document.getElementById("nextBtn");
 let prevButton = document.getElementById("prevBtn");
@@ -961,11 +963,13 @@ function showButtons() {
       nextButton.style.visibility = "hidden";
       prevButton.style.visibility = "hidden";
       startButton.style.bottom = "auto";
-      startButton.style.top = "30vh";
-      startButton.style.left = "25vw";
+      startButton.style.top = "40vh";
+      startButton.style.left = "35vw";
       startButton.style.right = "auto";
       startButton.style.visibility = "visible";
       insButton.style.visibility = "visible";
+      roomButton.style.visibility = "visible";
+      roomEntry.style.visibility = "visible";
     } else if (instruct == lastPage) {
       //instructions last page
       insButton.style.visibility = "hidden";
@@ -976,12 +980,16 @@ function showButtons() {
       nextButton.innerHTML = "PLAY!";
       nextButton.style.visibility = "visible";
       prevButton.style.visibility = "visible";
+      roomButton.style.visibility = "hidden";
+      roomEntry.style.visibility = "hidden";
     } else {
       //instructions pages
       startButton.style.visibility = "hidden";
       insButton.style.visibility = "hidden";
       nextButton.style.visibility = "visible";
       prevButton.style.visibility = "visible";
+      roomButton.style.visibility = "hidden";
+      roomEntry.style.visibility = "hidden";
     }
   } else if (screenMode == 1 && showButtonTemp == true) {
     //ready screen
@@ -993,16 +1001,22 @@ function showButtons() {
     startButton.style.left = "auto";
     startButton.style.right = "45vw";
     startButton.style.visibility = "visible";
+    roomButton.style.visibility = "hidden";
+    roomEntry.style.visibility = "hidden";
   } else if (screenMode > 1) {
     nextButton.style.visibility = "hidden";
     prevButton.style.visibility = "hidden";
     insButton.style.visibility = "hidden";
     startButton.style.visibility = "hidden";
+    roomButton.style.visibility = "hidden";
+    roomEntry.style.visibility = "hidden";
   } else {
     nextButton.style.visibility = "hidden";
     prevButton.style.visibility = "hidden";
     insButton.style.visibility = "hidden";
     startButton.style.visibility = "hidden";
+    roomButton.style.visibility = "hidden";
+    roomEntry.style.visibility = "hidden";
   }
 }
 function drawFlora() {
