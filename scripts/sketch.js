@@ -149,7 +149,7 @@ function setup() {
   me.branchCol = floor(random(0, 2));
   me.apples = [];
   me.trees = [];
-  me.readyToPlant = false;
+  me.isPlantingReady = false;
   if (partyIsHost()) {
     shared.loggers = [];
     shared.gameOver = false; //gameOver used where?
@@ -227,7 +227,7 @@ function mousePressed() {
       me.setTree = true;
       me.apples = []; //test;
       me.trees = []; //test
-      me.readyToPlant = false;
+      me.isPlantingReady = false; //sets to true when apple is removed and tree needs to be placed
       for (let i = 0; i < 3; i++) {
         growApples();
       }
@@ -238,16 +238,16 @@ function mousePressed() {
         } else {
           let tempBound = checkBoundary(); //check if apple area of tree
           if (tempBound) {
-            me.readyToPlant = removeApple(a, i);
+            me.isPlantingReady = removeApple(a, i);
           }
-          if (me.readyToPlant == true) {
-            console.log(me.readyToPlant, "make child tree"); //logging as true
+          if (me.isPlantingReady == true) {
+            console.log(me.isPlantingReady, "make child tree"); //logging as true
             makeChildTree(); //rewrites first element instead of pushing
           }
         }
       });
-      // console.log(me.readyToPlant); //logging as false despite being set to true within the if else loop
-      // if (me.readyToPlant == true) {
+      // console.log(me.isPlantingReady); //logging as false despite being set to true within the if else loop
+      // if (me.isPlantingReady == true) {
       //   console.log("make child tree");
       //   makeChildTree();
       // }
@@ -313,7 +313,7 @@ function makeChildTree() {
     // folShape: floor(random(0, 3)),
   });
   console.log(me.trees);
-  //readyToPlant = "false";
+  //isPlantingReady = "false";
 }
 //mousePressed related functions end
 
