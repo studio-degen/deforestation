@@ -137,7 +137,7 @@ function setup() {
   partyToggleInfo(); //hide party info panel
 
   imageMode(CENTER);
-  textFont("Inter");
+  textFont("Nunito");
   textSize(25);
   noStroke();
 
@@ -719,8 +719,9 @@ function instructionScreen() {
   // strokeWeight(3);
   // stroke(yellow);
   rect(width / 2, 275, 500, 350);
+  rect(width / 2, 475, 500, 150);
   noStroke();
-  fill(yellow);
+  fill(green1);
 
   switch (instruct) {
     case 0:
@@ -735,7 +736,7 @@ function instructionScreen() {
       text(
         "You are a tree. Click to plant yourself in the field when the game starts.",
         width / 2,
-        500,
+        475,
         450
       );
       break;
@@ -743,10 +744,10 @@ function instructionScreen() {
       showButtons();
       image(insGifs[1], width / 2, 275, 300, 300);
       text(
-        "Apples grow on your tree. Click to pick one up and click on the ground to plant it.",
+        "Apples grow on your tree. Click to pick one up and click again to plant it.",
         width / 2,
-        500,
-        500
+        475,
+        450
       );
       break;
     case 3:
@@ -755,8 +756,8 @@ function instructionScreen() {
       text(
         "You can only plant trees in your circle. The area will increase as time passes.",
         width / 2,
-        500,
-        475
+        475,
+        450
       );
       break;
     case 4:
@@ -765,8 +766,8 @@ function instructionScreen() {
       text(
         "Apples will automatically grow back over time. You can have up to 3 at once.",
         width / 2,
-        500,
-        500
+        475,
+        450
       );
       break;
     case 5:
@@ -775,8 +776,8 @@ function instructionScreen() {
       text(
         "There are loggers running around who will cut your trees down.",
         width / 2,
-        500,
-        500
+        475,
+        450
       );
       break;
     case 6:
@@ -785,8 +786,8 @@ function instructionScreen() {
       text(
         "Grow the forest with your other tree friends and stay alive as long as you can!",
         width / 2,
-        500,
-        500
+        475,
+        475
       );
       break;
   }
@@ -794,7 +795,14 @@ function instructionScreen() {
 }
 function homeScreen() {
   // nextButton.html("INSTRUCTIONS");
-  // background(brown2);
+  background(brown2);
+  push();
+  fill(yellow);
+  textFont("Rubik Microbe");
+  // textFont("Lexend Exa");
+  textSize(80);
+  text("A Forest Clearing", width / 2, 150);
+  pop();
   for (let i = 0; i < 3; i++) {
     // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
     generateNewSentence(
@@ -985,6 +993,10 @@ function showButtons() {
     } else {
       //instructions pages
       startButton.style.visibility = "hidden";
+      nextButton.style.backgroundColor = "var(--yellow)";
+      nextButton.style.color = "var(--green1)";
+      nextButton.style.border = "solid var(--green1) 2px";
+      nextButton.innerHTML = "NEXT";
       insButton.style.visibility = "hidden";
       nextButton.style.visibility = "visible";
       prevButton.style.visibility = "visible";
