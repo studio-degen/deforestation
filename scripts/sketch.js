@@ -98,11 +98,7 @@ setInterval(() => rushScene(), 30000);
 setInterval(() => addFlora(), 5000);
 
 function preload() {
-  partyConnect(
-    "wss://deepstream-server-1.herokuapp.com",
-    "studeg_deforestation_1",
-    room
-  );
+  partyConnect("wss://deepstream-server-1.herokuapp.com", "defor_1", room);
   //declaring party variables
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -266,7 +262,7 @@ function mousePressed() {
       //   console.log("planting tree now");
       //   makeChildTree();
       // }
-      // makeChildTree();
+      makeChildTree();
     }
   }
 }
