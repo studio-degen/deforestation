@@ -95,7 +95,7 @@ setInterval(() => rushScene(), 30000);
 setInterval(() => addFlora(), 5000);
 
 function preload() {
-  partyConnect("wss://deepstream-server-1.herokuapp.com", "defor_1", room);
+  partyConnect("wss://deepstream-server-1.herokuapp.com", "defor_2", room);
   //declaring party variables
   shared = partyLoadShared("globals");
   me = partyLoadMyShared();
@@ -232,27 +232,19 @@ function mousePressed() {
         growApples();
       }
     } else {
-      me.apples.forEach((a, i) => {
-        console.log(me.trees);
+      // me.apples.forEach((a, i) => {
+      for (i = 0; i < me.apples.length; i++) {
+        const a = me.apples[i];
         if (a.isDragged) {
-          let tempBound = checkBoundary(); //check if apple area of tree
-          if (tempBound) {
-            me.isPlantingReady = removeApple(a, i);
-          }
-          if (me.isPlantingReady) {
+          if (checkBoundary()) {
+            removeApple(a, i);
             console.log(me.isPlantingReady, "make child tree"); //logging as true
             makeChildTree(); //rewrites first element instead of pushing
           }
         } else {
           checkMouseDist(a); //checks if mouse is close enough to move the apple
         }
-      });
-      // console.log(me.isPlantingReady); //logging as false despite being set to true within the if else loop
-      // if (me.isPlantingReady == true) {
-      //   console.log("make child tree");
-      //   makeChildTree();
-      // }
-      //makeChildTree();
+      }
     }
   }
 }
@@ -303,15 +295,15 @@ function makeChildTree() {
   me.trees.push({
     x: mouseX,
     y: mouseY,
-    // count: 0,
-    // countMax: int(random(1, 3)),
-    // branchLength: random(40, 20),
-    // angle: radians(20),
-    // sentence: axiom,
-    // lSystem: int(random(1, 4)),
-    // setTree: true,
-    // folNum: floor(random(0, 3)),
-    // folShape: floor(random(0, 3)),
+    count: 0,
+    countMax: int(random(1, 3)),
+    branchLength: random(40, 20),
+    angle: radians(20),
+    sentence: axiom,
+    lSystem: int(random(1, 4)),
+    setTree: true,
+    folNum: floor(random(0, 3)),
+    folShape: floor(random(0, 3)),
   });
   console.log(me.trees);
 
