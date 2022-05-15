@@ -777,7 +777,7 @@ function homeScreen() {
   fill(yellow);
   textFont("Rubik Microbe");
   textSize(80);
-  text("A Forest Clearing TEST", width / 2, 150);
+  text("A TEST", width / 2, 150);
   pop();
   for (let i = 0; i < 3; i++) {
     // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
