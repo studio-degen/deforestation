@@ -388,8 +388,8 @@ function viewState() {
 function playState() {
   displayStats();
   drawPlayableArea();
-  drawAllElements();
   loggerCall();
+  drawAllElements();
   //draw apples periodically
   // setTimeout(() => growApples(), 10000);
   if (random() < 0.005) {
