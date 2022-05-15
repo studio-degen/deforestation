@@ -68,33 +68,36 @@ button {
 button:hover {
   opacity: 80%;
 }
+input{
+  font-family: "Nunito";
+}
 .gameBtn{
   position: absolute;
   z-index: 2;
 }
 #roomBtn{
-  top: 30vh;
+  top: 35vh;
   left: 35vw;
   background-color: var(--yellow);
   color: var(--brown1);
   border: solid var(--brown1) 2px;
 }
 #room{
-  top: 30vh;
+  top: 35vh;
   left: 45vw;
   background-color: var(--yellow);
   color: var(--brown1);
   border: solid var(--brown1) 2px;
 }
 #startBtn{
-  top: 40vh;
+  top: 45vh;
   left: 35vw;
   background-color: var(--red);
   color: var(--brown1);
   border: solid var(--brown1) 2px;
 }
 #insBtn{
-  top: 50vh;
+  top: 55vh;
   left: 35vw;
 }
 #nextBtn{

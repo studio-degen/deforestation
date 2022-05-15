@@ -41,8 +41,6 @@ let rules = [];
 let fol_a = [];
 let fol_b = [];
 let fol_c = [];
-// let br1 = [];
-// let br2 = [];
 let appleImgs = [];
 let insGifs = [];
 let allOfTheTrees = [];
@@ -254,7 +252,7 @@ function treeHeightSum(length, countMax) {
 }
 function checkMouseDist(apple) {
   let appleDist = dist(mouseX, mouseY, apple.x, apple.y);
-  if (appleDist <= 5) {
+  if (appleDist <= 8) {
     // check if mouse is within apple picking up range
     apple.isDragged = true;
   }
@@ -465,10 +463,10 @@ function drawAllElements() {
           );
         }
       }
-      // draw apple selection outline
+      //draw apple selection outline
       for (const a of me.apples) {
         d = dist(mouseX, mouseY, a.x, a.y);
-        if (d <= 5) {
+        if (d <= 8 && !a.isDragged) {
           push();
           noFill();
           stroke(255, 230, 5);
@@ -768,7 +766,6 @@ function homeScreen() {
   push();
   fill(yellow);
   textFont("Rubik Microbe");
-  // textFont("Lexend Exa");
   textSize(80);
   text("A Forest Clearing", width / 2, 150);
   pop();
@@ -940,7 +937,7 @@ function showButtons() {
       nextButton.style.visibility = "hidden";
       prevButton.style.visibility = "hidden";
       startButton.style.bottom = "auto";
-      startButton.style.top = "40vh";
+      startButton.style.top = "45vh";
       startButton.style.left = "35vw";
       startButton.style.right = "auto";
       startButton.style.visibility = "visible";
