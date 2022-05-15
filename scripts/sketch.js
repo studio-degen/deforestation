@@ -220,10 +220,10 @@ function mousePressed() {
         if (a.isDragged) {
           if (checkBoundary()) {
             removeApple(a, i);
-            makeChildTree(); //rewrites first element instead of pushing
+            makeChildTree();
           }
         } else {
-          checkMouseDist(a); //checks if mouse is close enough to move the apple
+          checkMouseDist(a);
         }
       }
     }
@@ -233,10 +233,11 @@ function mousePressed() {
 function growApples() {
   if (me.apples.length < 3) {
     let treeHeight = treeHeightSum(me.branchLength, me.countMax);
-    console.log("new apple created");
+    let temp_x = random(me.x - 15, me.x + 25);
+    let temp_y = random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight);
     me.apples.push({
-      x: random(me.x - 15, me.x + 25),
-      y: random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight),
+      x: temp_x,
+      y: temp_y,
       isDragged: false,
     });
   }
@@ -252,7 +253,7 @@ function treeHeightSum(length, countMax) {
 }
 function checkMouseDist(apple) {
   let appleDist = dist(mouseX, mouseY, apple.x, apple.y);
-  if (appleDist <= 8) {
+  if (appleDist <= 5) {
     // check if mouse is within apple picking up range
     apple.isDragged = true;
   }
@@ -265,10 +266,10 @@ function checkBoundary() {
     yLen <= me.branchLength / 2 //check to plant within the tree's planting area radius
   ) {
     return true;
+    apple.isDragged = false;
   }
 }
 function removeApple(apple, index) {
-  apple.isDragged = false;
   me.apples.splice(index, 1); //remove this apple from array
 }
 function makeChildTree() {
@@ -386,15 +387,14 @@ function viewState() {
   pop();
 }
 function playState() {
-  displayStats();
-  drawPlayableArea();
-  drawAllElements();
-  loggerCall();
-  //draw apples periodically
-  // setTimeout(() => growApples(), 10000);
-  if (random() < 0.005) {
+  drawPlayableArea(); //first draw playable circle
+  // loggerCall(); //second draw loggers
+  drawAllElements(); //third draw trees and apples
+  //grow apples periodically
+  if (random() < 0.001) {
     growApples();
   }
+  displayStats(); //last displaye stats
 }
 //drawing on screen fns
 function drawPlayableArea() {
@@ -466,7 +466,7 @@ function drawAllElements() {
       //draw apple selection outline
       for (const a of me.apples) {
         d = dist(mouseX, mouseY, a.x, a.y);
-        if (d <= 8 && !a.isDragged) {
+        if (d <= 5 && !a.isDragged) {
           push();
           noFill();
           stroke(255, 230, 5);
@@ -1051,7 +1051,7 @@ function addFlora() {
     }
   }
 }
-setInterval(() => gameTimer(), 1000);
-setInterval(() => addLogger(), 15000);
-setInterval(() => rushScene(), 30000);
 setInterval(() => addFlora(), 5000);
+setInterval(() => gameTimer(), 1000);
+// setInterval(() => addLogger(), 15000);
+// setInterval(() => rushScene(), 30000);
