@@ -86,7 +86,7 @@ rockClump = [];
 floraCount = 0;
 
 function preload() {
-  partyConnect("wss://deepstream-server-1.herokuapp.com", "defor_tm", room);
+  partyConnect("wss://deepstream-server-1.herokuapp.com", "ar_afc", room);
   //declaring party variables
   shared = partyLoadShared("globals");
   sharedLog = partyLoadShared("logging");
@@ -217,11 +217,13 @@ function mousePressed() {
     } else {
       for (i = 0; i < me.apples.length; i++) {
         const a = me.apples[i];
-        if (!a.selected) {
-          checkMouseDist(a);
-        } else if (checkBoundary() && a.selected) {
-          removeApple(i);
-          makeChildTree();
+        if (a.isDragged) {
+          if (checkBoundary()) {
+            removeApple(a, i);
+            makeChildTree(); //rewrites first element instead of pushing
+          }
+        } else {
+          checkMouseDist(a); //checks if mouse is close enough to move the apple
         }
       }
     }
@@ -231,12 +233,11 @@ function mousePressed() {
 function growApples() {
   if (me.apples.length < 3) {
     let treeHeight = treeHeightSum(me.branchLength, me.countMax);
-    let temp_x = random(me.x - 15, me.x + 25);
-    let temp_y = random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight);
+    // console.log("new apple created");
     me.apples.push({
-      x: temp_x,
-      y: temp_y,
-      selected: false,
+      x: random(me.x - 15, me.x + 25),
+      y: random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight),
+      isDragged: false,
     });
   }
 }
@@ -249,11 +250,11 @@ function treeHeightSum(length, countMax) {
   }
   return sum;
 }
-function checkMouseDist(a) {
-  let appleDist = dist(mouseX, mouseY, a.x, a.y); // check if mouse is within apple picking up range
-  if (appleDist <= 5) {
-    a.selected = true;
-    return true;
+function checkMouseDist(apple) {
+  let appleDist = dist(mouseX, mouseY, apple.x, apple.y);
+  if (appleDist <= 8) {
+    // check if mouse is within apple picking up range
+    apple.isDragged = true;
   }
 }
 function checkBoundary() {
@@ -266,7 +267,8 @@ function checkBoundary() {
     return true;
   }
 }
-function removeApple(index) {
+function removeApple(apple, index) {
+  apple.isDragged = false;
   me.apples.splice(index, 1); //remove this apple from array
 }
 function makeChildTree() {
@@ -384,31 +386,21 @@ function viewState() {
   pop();
 }
 function playState() {
-  drawPlayableArea(); //first draw playable circle
-  // loggerCall(); //second draw loggers
-  drawAllElements(); //third draw trees and apples
-  //grow apples periodically
-  if (random() < 0.001) {
+  displayStats();
+  drawPlayableArea();
+  drawAllElements();
+  loggerCall();
+  //draw apples periodically
+  // setTimeout(() => growApples(), 10000);
+  if (random() < 0.005) {
     growApples();
-  }
-  displayStats(); //last displaye stats
-  // appleCheck();
-}
-function appleCheck() {
-  for (i = 0; i < me.apples.length; i++) {
-    const a = me.apples[i];
-    if (!a.selected) {
-      console.log("apple ", i, " not selected");
-    } else {
-      console.log("apple ", i, " selected");
-    }
   }
 }
 //drawing on screen fns
 function drawPlayableArea() {
   push();
   fill(255, 255, 255, 100);
-  me.setTree
+  me.x && me.y
     ? ellipse(me.x, me.y, me.treeArea, me.branchLength)
     : appleOnMouse();
   pop();
@@ -420,11 +412,11 @@ function appleOnMouse() {
   image(appleImgs[me.appleShape], mouseX, mouseY, 12, 12); //apple image on mouse
   pop();
 }
-function changeApplePos(a) {
-  a.x = mouseX;
-  a.y = mouseY;
-}
 function drawAllElements() {
+  if (me.setTree == false) {
+    //draw local apple moving with the mouse
+    appleOnMouse();
+  }
   for (const t of participants) {
     if (t.setTree == true) {
       // draw the main tree per participant
@@ -447,10 +439,9 @@ function drawAllElements() {
         for (i = 0; i < t.apples.length; i++) {
           //for loop because for each loop is not working
           const a = t.apples[i];
-          if (a.selected) {
-            changeApplePos(a);
-          }
-          image(appleImgs[me.appleShape], a.x, a.y, 12, 12);
+          a.isDragged //a.isDragged keeps track of whether it is selects
+            ? image(appleImgs[me.appleShape], mouseX, mouseY, 12, 12) //in motion
+            : image(appleImgs[me.appleShape], a.x, a.y, 12, 12); //stationary
         }
       }
       //drawing child trees
@@ -475,7 +466,7 @@ function drawAllElements() {
       //draw apple selection outline
       for (const a of me.apples) {
         d = dist(mouseX, mouseY, a.x, a.y);
-        if (d <= 5 && !a.selected) {
+        if (d <= 8 && !a.isDragged) {
           push();
           noFill();
           stroke(255, 230, 5);
@@ -777,7 +768,7 @@ function homeScreen() {
   fill(yellow);
   textFont("Rubik Microbe");
   textSize(80);
-  text("A TEST", width / 2, 150);
+  text("A Forest Clearing", width / 2, 150);
   pop();
   for (let i = 0; i < 3; i++) {
     // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
@@ -1060,7 +1051,7 @@ function addFlora() {
     }
   }
 }
-setInterval(() => addFlora(), 5000);
 setInterval(() => gameTimer(), 1000);
-// setInterval(() => addLogger(), 15000);
-// setInterval(() => rushScene(), 30000);
+setInterval(() => addLogger(), 15000);
+setInterval(() => rushScene(), 30000);
+setInterval(() => addFlora(), 5000);
