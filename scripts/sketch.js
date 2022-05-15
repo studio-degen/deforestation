@@ -86,7 +86,7 @@ rockClump = [];
 floraCount = 0;
 
 function preload() {
-  partyConnect("wss://deepstream-server-1.herokuapp.com", "15/05", "tm");
+  partyConnect("wss://deepstream-server-1.herokuapp.com", "defor_tm", room);
   //declaring party variables
   shared = partyLoadShared("globals");
   sharedLog = partyLoadShared("logging");
