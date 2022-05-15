@@ -86,7 +86,7 @@ rockClump = [];
 floraCount = 0;
 
 function preload() {
-  partyConnect("wss://deepstream-server-1.herokuapp.com", "ar_afc", room);
+  partyConnect("wss://deepstream-server-1.herokuapp.com", "15/05", "tm");
   //declaring party variables
   shared = partyLoadShared("globals");
   sharedLog = partyLoadShared("logging");
@@ -217,13 +217,11 @@ function mousePressed() {
     } else {
       for (i = 0; i < me.apples.length; i++) {
         const a = me.apples[i];
-        if (a.isDragged) {
-          if (checkBoundary()) {
-            removeApple(a, i);
-            makeChildTree();
-          }
-        } else {
+        if (!a.selected) {
           checkMouseDist(a);
+        } else if (checkBoundary() && a.selected) {
+          removeApple(i);
+          makeChildTree();
         }
       }
     }
@@ -238,7 +236,7 @@ function growApples() {
     me.apples.push({
       x: temp_x,
       y: temp_y,
-      isDragged: false,
+      selected: false,
     });
   }
 }
@@ -251,11 +249,11 @@ function treeHeightSum(length, countMax) {
   }
   return sum;
 }
-function checkMouseDist(apple) {
-  let appleDist = dist(mouseX, mouseY, apple.x, apple.y);
+function checkMouseDist(a) {
+  let appleDist = dist(mouseX, mouseY, a.x, a.y); // check if mouse is within apple picking up range
   if (appleDist <= 5) {
-    // check if mouse is within apple picking up range
-    apple.isDragged = true;
+    a.selected = true;
+    return true;
   }
 }
 function checkBoundary() {
@@ -266,10 +264,9 @@ function checkBoundary() {
     yLen <= me.branchLength / 2 //check to plant within the tree's planting area radius
   ) {
     return true;
-    apple.isDragged = false;
   }
 }
-function removeApple(apple, index) {
+function removeApple(index) {
   me.apples.splice(index, 1); //remove this apple from array
 }
 function makeChildTree() {
@@ -395,12 +392,23 @@ function playState() {
     growApples();
   }
   displayStats(); //last displaye stats
+  // appleCheck();
+}
+function appleCheck() {
+  for (i = 0; i < me.apples.length; i++) {
+    const a = me.apples[i];
+    if (!a.selected) {
+      console.log("apple ", i, " not selected");
+    } else {
+      console.log("apple ", i, " selected");
+    }
+  }
 }
 //drawing on screen fns
 function drawPlayableArea() {
   push();
   fill(255, 255, 255, 100);
-  me.x && me.y
+  me.setTree
     ? ellipse(me.x, me.y, me.treeArea, me.branchLength)
     : appleOnMouse();
   pop();
@@ -412,11 +420,11 @@ function appleOnMouse() {
   image(appleImgs[me.appleShape], mouseX, mouseY, 12, 12); //apple image on mouse
   pop();
 }
+function changeApplePos(a) {
+  a.x = mouseX;
+  a.y = mouseY;
+}
 function drawAllElements() {
-  if (me.setTree == false) {
-    //draw local apple moving with the mouse
-    appleOnMouse();
-  }
   for (const t of participants) {
     if (t.setTree == true) {
       // draw the main tree per participant
@@ -439,9 +447,10 @@ function drawAllElements() {
         for (i = 0; i < t.apples.length; i++) {
           //for loop because for each loop is not working
           const a = t.apples[i];
-          a.isDragged //a.isDragged keeps track of whether it is selects
-            ? image(appleImgs[me.appleShape], mouseX, mouseY, 12, 12) //in motion
-            : image(appleImgs[me.appleShape], a.x, a.y, 12, 12); //stationary
+          if (a.selected) {
+            changeApplePos(a);
+          }
+          image(appleImgs[me.appleShape], a.x, a.y, 12, 12);
         }
       }
       //drawing child trees
@@ -466,7 +475,7 @@ function drawAllElements() {
       //draw apple selection outline
       for (const a of me.apples) {
         d = dist(mouseX, mouseY, a.x, a.y);
-        if (d <= 5 && !a.isDragged) {
+        if (d <= 5 && !a.selected) {
           push();
           noFill();
           stroke(255, 230, 5);
