@@ -87,16 +87,11 @@ flower = [];
 rockClump = [];
 floraCount = 0;
 
-setInterval(() => gameState(), 30);
-setInterval(() => gameTimer(), 1000);
-setInterval(() => addLogger(), 15000);
-setInterval(() => rushScene(), 30000);
-setInterval(() => addFlora(), 5000);
-
 function preload() {
-  partyConnect("wss://deepstream-server-1.herokuapp.com", "defor_2", room);
+  partyConnect("wss://deepstream-server-1.herokuapp.com", "tm_afc", room);
   //declaring party variables
   shared = partyLoadShared("globals");
+  sharedLog = partyLoadShared("logging");
   me = partyLoadMyShared();
   participants = partyLoadParticipantShareds();
   //loading all image assets
@@ -124,15 +119,12 @@ function preload() {
 }
 function setup() {
   createCanvas(1300, 650);
-  background(green1); //BG CONTROL HERE
-
+  background(green1);
   partyToggleInfo(); //hide party info panel
-
   imageMode(CENTER);
   textFont("Nunito");
   textSize(25);
   noStroke();
-
   me.x = 0;
   me.y = 0;
   me.count = 0;
@@ -148,17 +140,16 @@ function setup() {
   me.branchCol = floor(random(0, 2));
   me.apples = [];
   me.childtrees = [];
-  me.isPlantingReady = false;
   if (partyIsHost()) {
-    shared.loggers = [];
-    shared.gameOver = false; //gameOver used where?
+    sharedLog.loggers = [];
     shared.gameStartChk = false; //gameStartChk used in mousePressed so player can place trees only after game starts
     shared.gameTime = 0;
     shared.gameBegin = false;
+    shared.gameOver = false; //gameOver used where?
     shared.floraArr = [];
     instruct = 0;
     screenMode = 0;
-    shared.loggers.push({
+    sharedLog.loggers.push({
       pos: { x: random(width), y: random(height) },
       d: { x: random(-6, 6), y: random(-6, 6) },
       step: 6,
@@ -169,7 +160,6 @@ function setup() {
       destrand: random(),
     });
   }
-
   //homescreen tree generation
   for (let i = 0; i < 3; i++) {
     w[i] = width / 2 + i * 100 + 200;
@@ -212,7 +202,6 @@ function mousePressed() {
     screenMode == gameScreenMode &&
     me.state == "player"
   ) {
-    // console.log(me.apples.length, me.childtrees);
     if (me.setTree === false) {
       //setting main tree initial values
       me.x = mouseX; //location
@@ -224,20 +213,15 @@ function mousePressed() {
       me.sentence = axiom; //axiom = X
       me.lSystem = int(random(1, 4));
       me.setTree = true;
-      me.apples = []; //test;
-      // me.childtrees = []; //test
-      me.isPlantingReady = false; //sets to true when apple is removed and tree needs to be placed
       for (let i = 0; i < 3; i++) {
         growApples();
       }
     } else {
-      // me.apples.forEach((a, i) => {
       for (i = 0; i < me.apples.length; i++) {
         const a = me.apples[i];
         if (a.isDragged) {
           if (checkBoundary()) {
             removeApple(a, i);
-            console.log(me.isPlantingReady, "make child tree"); //logging as true
             makeChildTree(); //rewrites first element instead of pushing
           }
         } else {
@@ -251,6 +235,7 @@ function mousePressed() {
 function growApples() {
   if (me.apples.length < 3) {
     let treeHeight = treeHeightSum(me.branchLength, me.countMax);
+    console.log("new apple created");
     me.apples.push({
       x: random(me.x - 15, me.x + 25),
       y: random(me.y - (me.branchLength / 4) * 3, me.y - treeHeight),
@@ -287,10 +272,8 @@ function checkBoundary() {
 function removeApple(apple, index) {
   apple.isDragged = false;
   me.apples.splice(index, 1); //remove this apple from array
-  return true; //
 }
 function makeChildTree() {
-  console.log("planting tree inside");
   me.childtrees.push({
     x: mouseX,
     y: mouseY,
@@ -304,7 +287,6 @@ function makeChildTree() {
     folNum: floor(random(0, 3)),
     folShape: floor(random(0, 3)),
   });
-  console.log(me.childtrees);
 }
 //mousePressed related functions end
 //generate tree
@@ -389,14 +371,14 @@ function generateNewSentence(x, y, c, cmax, l, a, s, ls, num, shape, size) {
 }
 //end tree generation
 function draw() {
+  gameState();
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     background(bgCol);
     drawFlora();
     if (partyIsHost()) {
-      shared.gameBegin = true;
+      shared.gameBegin = true; //start game when host is ready, everyone else automatically syncs to same page
     }
-    if (me.state == "viewer") viewState();
-    else playState();
+    me.state == "viewer" ? viewState() : playState(); //deciding which player controls fn to call depending on state
   }
 }
 function viewState() {
@@ -406,24 +388,39 @@ function viewState() {
   pop();
 }
 function playState() {
+  displayStats();
   drawPlayableArea();
-  drawTreesOnScreen();
-
-  if (me.setTree == false) {
-    push();
-    fill(255, 255, 255, 150);
-    image(appleImgs[me.appleShape], mouseX, mouseY, 12, 12); //apple image on mouse
-    pop();
+  drawAllElements();
+  loggerCall();
+  //draw apples periodically
+  // setTimeout(() => growApples(), 10000);
+  if (random() < 0.005) {
+    growApples();
   }
-
+}
+//drawing on screen fns
+function drawPlayableArea() {
+  push();
+  fill(255, 255, 255, 100);
+  me.x && me.y
+    ? ellipse(me.x, me.y, me.treeArea, me.branchLength)
+    : appleOnMouse();
+  pop();
+}
+function appleOnMouse() {
+  push();
+  fill(255, 255, 255, 150);
+  ellipse(mouseX, mouseY, me.treeArea, me.treeArea / 2); //draw initial planting area
+  image(appleImgs[me.appleShape], mouseX, mouseY, 12, 12); //apple image on mouse
+  pop();
+}
+function drawAllElements() {
+  if (me.setTree == false) {
+    //draw local apple moving with the mouse
+    appleOnMouse();
+  }
   for (const t of participants) {
     if (t.setTree == true) {
-      // draw the area
-      // push();
-      // fill(255, 255, 255, 100);
-      // ellipse(t.x, t.y, me.treeArea, t.branchLength);
-      // pop();
-
       // draw the main tree per participant
       generateNewSentence(
         t.x,
@@ -438,114 +435,130 @@ function playState() {
         t.folShape,
         30
       );
+      //drawing apples
+      if (t.apples) {
+        //check there are apples to draw
+        for (i = 0; i < t.apples.length; i++) {
+          //for loop because for each loop is not working
+          const a = t.apples[i];
+          a.isDragged //a.isDragged keeps track of whether it is selects
+            ? image(appleImgs[me.appleShape], mouseX, mouseY, 12, 12) //in motion
+            : image(appleImgs[me.appleShape], a.x, a.y, 12, 12); //stationary
+        }
+      }
+      //drawing child trees
+      if (t.childtrees.length) {
+        for (let i = 0; i < t.childtrees.length; i++) {
+          c = t.childtrees[i];
+          generateNewSentence(
+            c.x,
+            c.y,
+            c.count,
+            c.countMax,
+            c.branchLength,
+            c.angle,
+            c.sentence,
+            c.lSystem,
+            c.folNum,
+            c.folShape,
+            30
+          );
+        }
+      }
+      // draw apple selection outline
+      for (const a of me.apples) {
+        d = dist(mouseX, mouseY, a.x, a.y);
+        if (d <= 5) {
+          push();
+          noFill();
+          stroke(255, 230, 5);
+          strokeWeight(3);
+          ellipse(a.x, a.y, 17);
+          pop();
+        }
+      }
     }
   }
-
-  // // draw apple selection outline
-  // for (const a of me.apples) {
-  //   d = dist(mouseX, mouseY, a.x, a.y);
-  //   if (d <= 5) {
-  //     push();
-  //     noFill();
-  //     stroke(255, 230, 5);
-  //     strokeWeight(3);
-  //     ellipse(a.x, a.y, 17);
-  //     pop();
-  //   }
-  // }
-
-  // if (partyIsHost()) {
-  //   shared.loggers.forEach((logger) => {
-  //     stepLogger(logger);
-
-  //     participants.forEach((p) => {
-  //       if (!logger.woodpicked) {
-  //         //console.log(p.trees);
-
-  //         let treeDist;
-  //         p.trees.forEach((t, index) => {
-  //           treeDist = dist(logger.pos.x, logger.pos.y, t.x, t.y);
-  //           if (treeDist < 30) {
-  //             //console.log('close');
-  //             logger.cutting = true;
-  //             if (treeDist > 10) {
-  //               if (logger.target == null) {
-  //                 logger.target = t;
-  //               } else {
-  //                 logger.d.x = lerp(
-  //                   logger.d.x,
-  //                   (logger.target.x - logger.pos.x) / 20,
-  //                   0.2
-  //                 );
-  //                 logger.d.y = lerp(
-  //                   logger.d.y,
-  //                   (logger.target.y - logger.pos.y) / 20,
-  //                   0.2
-  //                 );
-  //               }
-  //             } else if (treeDist < 10) {
-  //               //console.log('hit');
-  //               // if(int(millis())/1000 % 60){
-  //               //   logger.cutTime--;
-  //               // }
-
-  //               //if(logger.cutTime == 0){
-  //               //logger.d.x = 0;
-  //               //logger.d.y = 0;
-  //               p.trees.splice(index, 1);
-  //               logger.target = null;
-  //               //console.log(p.trees)
-  //               logger.woodpicked = true;
-  //               //}
-  //               setTimeout(() => {
-  //                 logger.cutting = false;
-  //                 //logger.cutTime = 10;
-  //               }, 2000);
-  //             }
-  //           }
-  //         });
-  //       }
-  //     });
-  //   });
-  // }
-
-  // shared.loggers.forEach((logger) => {
-  //   if (!logger.woodpicked) {
-  //     image(axeGif, logger.pos.x, logger.pos.y, 25, 25);
-  //   } else {
-  //     image(woodGif, logger.pos.x, logger.pos.y, 25, 25);
-  //   }
-  // });
-
-  // //console.log(shared.loggers);
-  // let randint = random();
-  // if (randint < 0.003) {
-  //   setTimeout(growApples(), 3000);
-  // }
-
-  // // stats
-  // push();
-  // fill(255, 255, 255, 200);
-  // rect(width - 117, 35, 90, 75, 5);
-  // fill(brown2);
-  // let mins = floor(shared.gameTime / 60);
-  // let secs = floor(shared.gameTime % 60);
-  // if (secs < 10) {
-  //   secs = "0" + secs;
-  // }
-  // text(mins + ":" + secs, width - 79, 60);
-  // image(clockImg, width - 100, 53, 20, 20);
-  // text(allOfTheChildTrees.length, width - 80, 100);
-  // image(treeCountImg, width - 100, 93, 20, 20);
-  // pop();
 }
-function drawTreesOnScreen() {
+function displayStats() {
   push();
-  fill(255, 255, 255, 100);
-  me.x && me.y
-    ? ellipse(me.x, me.y, me.treeArea, me.branchLength)
-    : ellipse(mouseX, mouseY, me.treeArea, me.treeArea / 2); //draw initial planting area
+  fill(255, 255, 255, 200);
+  rect(width - 117, 35, 90, 75, 5);
+  fill(brown2);
+  let mins = floor(shared.gameTime / 60);
+  let secs = floor(shared.gameTime % 60);
+  if (secs < 10) {
+    secs = "0" + secs;
+  }
+  text(mins + ":" + secs, width - 79, 60);
+  image(clockImg, width - 100, 53, 20, 20);
+  text(allOfTheChildTrees.length, width - 80, 100);
+  image(treeCountImg, width - 100, 93, 20, 20);
   pop();
+}
+//drawing on screen fns end here
+//All logger code starts
+function loggerCall() {
+  if (partyIsHost()) {
+    sharedLog.loggers.forEach((logger) => {
+      stepLogger(logger);
+      for (i = 0; i < participants.length; i++) {
+        p = participants[i];
+        if (!logger.woodpicked) {
+          //console.log(p.trees);
+          let treeDist;
+          p.trees.forEach((t, index) => {
+            treeDist = dist(logger.pos.x, logger.pos.y, t.x, t.y);
+            if (treeDist < 30) {
+              //console.log('close');
+              logger.cutting = true;
+              if (treeDist > 10) {
+                if (logger.target == null) {
+                  logger.target = t;
+                } else {
+                  logger.d.x = lerp(
+                    logger.d.x,
+                    (logger.target.x - logger.pos.x) / 20,
+                    0.2
+                  );
+                  logger.d.y = lerp(
+                    logger.d.y,
+                    (logger.target.y - logger.pos.y) / 20,
+                    0.2
+                  );
+                }
+              } else if (treeDist < 10) {
+                //console.log('hit');
+                // if(int(millis())/1000 % 60){
+                //   logger.cutTime--;
+                // }
+                //if(logger.cutTime == 0){
+                //logger.d.x = 0;
+                //logger.d.y = 0;
+                p.trees.splice(index, 1);
+                logger.target = null;
+                //console.log(p.trees)
+                logger.woodpicked = true;
+                //}
+                setTimeout(() => {
+                  logger.cutting = false;
+                  //logger.cutTime = 10;
+                }, 2000);
+              }
+            }
+          });
+        }
+      }
+    });
+  }
+  sharedLog.loggers.forEach((logger) => {
+    if (!logger.woodpicked) {
+      image(axeGif, logger.pos.x, logger.pos.y, 25, 25);
+    } else {
+      image(woodGif, logger.pos.x, logger.pos.y, 25, 25);
+    }
+  });
+  console.log(sharedLog.loggers);
 }
 function stepLogger(o) {
   let rand = random();
@@ -588,7 +601,7 @@ function stepLogger(o) {
 function addLogger() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     if (partyIsHost()) {
-      shared.loggers.push({
+      sharedLog.loggers.push({
         pos: { x: random(width), y: random(height) },
         d: { x: random(-6, 6), y: random(-6, 6) },
         step: 6,
@@ -617,6 +630,7 @@ function rushScene() {
     }
   }
 }
+//All logger code ends
 function gameTimer() {
   if (partyIsHost()) {
     if (shared.gameBegin && !shared.gameOver) {
@@ -643,6 +657,7 @@ function gameTimer() {
   // console.log(gameTime, allOfTheTrees.length);
 }
 function gameState() {
+  background(green1);
   switch (screenMode) {
     case 0:
       instructionScreen();
@@ -1008,21 +1023,6 @@ function drawFlora() {
   // }
 }
 function addFlora() {
-  // if (partyIsHost()) {
-  //   if (floraCount == 0) {
-  //     rockClump.forEach((e) => {
-  //       console.log(e);
-  //       shared.floraArr.push({
-  //         index: int(random(6)),
-  //         type: "rock",
-  //         xPos: random(width - 5),
-  //         yPos: random(height - 5),
-  //       });
-  //     });
-  //     floraCount++;
-  //   }
-  // }
-  // console.log(shared.floraArr);
   if (partyIsHost()) {
     if (floraCount == 0) {
       rockClump.forEach((e) => {
@@ -1052,7 +1052,8 @@ function addFlora() {
       }
     }
   }
-  // if ((shared.floraArr.length = 111)) {
-  //   shared.floraArr.splice(7, 3);
-  // }
 }
+setInterval(() => gameTimer(), 1000);
+setInterval(() => addLogger(), 15000);
+setInterval(() => rushScene(), 30000);
+setInterval(() => addFlora(), 5000);
