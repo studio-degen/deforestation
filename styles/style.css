@@ -77,14 +77,15 @@ input{
 }
 #roomBtn{
   top: 35vh;
-  left: 35vw;
+  left: 47vw;
   background-color: var(--yellow);
   color: var(--brown1);
   border: solid var(--brown1) 2px;
 }
 #room{
+  width: 100px;
   top: 35vh;
-  left: 45vw;
+  left: 35vw;
   background-color: var(--yellow);
   color: var(--brown1);
   border: solid var(--brown1) 2px;

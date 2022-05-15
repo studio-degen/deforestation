@@ -86,7 +86,7 @@ rockClump = [];
 floraCount = 0;
 
 function preload() {
-  partyConnect("wss://deepstream-server-1.herokuapp.com", "tm_afc", room);
+  partyConnect("wss://deepstream-server-1.herokuapp.com", "ar_afc", room);
   //declaring party variables
   shared = partyLoadShared("globals");
   sharedLog = partyLoadShared("logging");
@@ -497,65 +497,66 @@ function displayStats() {
 //drawing on screen fns end here
 //All logger code starts
 function loggerCall() {
-  // if (partyIsHost()) {
-  //   sharedLog.loggers.forEach((logger) => {
-  //     stepLogger(logger);
-  //     for (i = 0; i < participants.length; i++) {
-  //       p = participants[i];
-  //       if (!logger.woodpicked) {
-  //         //console.log(p.trees);
-  //         let treeDist;
-  //         p.trees.forEach((t, index) => {
-  //           treeDist = dist(logger.pos.x, logger.pos.y, t.x, t.y);
-  //           if (treeDist < 30) {
-  //             //console.log('close');
-  //             logger.cutting = true;
-  //             if (treeDist > 10) {
-  //               if (logger.target == null) {
-  //                 logger.target = t;
-  //               } else {
-  //                 logger.d.x = lerp(
-  //                   logger.d.x,
-  //                   (logger.target.x - logger.pos.x) / 20,
-  //                   0.2
-  //                 );
-  //                 logger.d.y = lerp(
-  //                   logger.d.y,
-  //                   (logger.target.y - logger.pos.y) / 20,
-  //                   0.2
-  //                 );
-  //               }
-  //             } else if (treeDist < 10) {
-  //               //console.log('hit');
-  //               // if(int(millis())/1000 % 60){
-  //               //   logger.cutTime--;
-  //               // }
-  //               //if(logger.cutTime == 0){
-  //               //logger.d.x = 0;
-  //               //logger.d.y = 0;
-  //               p.trees.splice(index, 1);
-  //               logger.target = null;
-  //               //console.log(p.trees)
-  //               logger.woodpicked = true;
-  //               //}
-  //               setTimeout(() => {
-  //                 logger.cutting = false;
-  //                 //logger.cutTime = 10;
-  //               }, 2000);
-  //             }
-  //           }
-  //         });
-  //       }
-  //     }
-  //   });
-  // }
-  // sharedLog.loggers.forEach((logger) => {
-  //   if (!logger.woodpicked) {
-  //     image(axeGif, logger.pos.x, logger.pos.y, 25, 25);
-  //   } else {
-  //     image(woodGif, logger.pos.x, logger.pos.y, 25, 25);
-  //   }
-  // });
+  if (partyIsHost()) {
+    sharedLog.loggers.forEach((logger) => {
+      stepLogger(logger);
+      for (i = 0; i < participants.length; i++) {
+        p = participants[i];
+        //console.log(p);
+        if (!logger.woodpicked) {
+          //console.log(p.trees);
+          let treeDist;
+          p.childtrees.forEach((t, index) => {
+            treeDist = dist(logger.pos.x, logger.pos.y, t.x, t.y);
+            if (treeDist < 30) {
+              //console.log('close');
+              logger.cutting = true;
+              if (treeDist > 10) {
+                if (logger.target == null) {
+                  logger.target = t;
+                } else {
+                  logger.d.x = lerp(
+                    logger.d.x,
+                    (logger.target.x - logger.pos.x) / 20,
+                    0.2
+                  );
+                  logger.d.y = lerp(
+                    logger.d.y,
+                    (logger.target.y - logger.pos.y) / 20,
+                    0.2
+                  );
+                }
+              } else if (treeDist < 10) {
+                //console.log('hit');
+                // if(int(millis())/1000 % 60){
+                //   logger.cutTime--;
+                // }
+                //if(logger.cutTime == 0){
+                //logger.d.x = 0;
+                //logger.d.y = 0;
+                p.childtrees.splice(index, 1);
+                logger.target = null;
+                //console.log(p.trees)
+                logger.woodpicked = true;
+                //}
+                setTimeout(() => {
+                  logger.cutting = false;
+                  //logger.cutTime = 10;
+                }, 2000);
+              }
+            }
+          });
+        }
+      }
+    });
+  }
+  sharedLog.loggers.forEach((logger) => {
+    if (!logger.woodpicked) {
+      image(axeGif, logger.pos.x, logger.pos.y, 25, 25);
+    } else {
+      image(woodGif, logger.pos.x, logger.pos.y, 25, 25);
+    }
+  });
   // console.log(sharedLog.loggers);
 }
 function stepLogger(o) {
@@ -614,7 +615,7 @@ function addLogger() {
 function rushScene() {
   if (shared.gameStartChk == true && screenMode == gameScreenMode) {
     if (partyIsHost()) {
-      shared.loggers.forEach((logger) => {
+      sharedLog.loggers.forEach((logger) => {
         if (logger.step < 20) {
           logger.step += 4;
         }
@@ -1051,6 +1052,6 @@ function addFlora() {
   }
 }
 setInterval(() => gameTimer(), 1000);
-// setInterval(() => addLogger(), 15000);
-// setInterval(() => rushScene(), 30000);
+setInterval(() => addLogger(), 15000);
+setInterval(() => rushScene(), 30000);
 setInterval(() => addFlora(), 5000);
