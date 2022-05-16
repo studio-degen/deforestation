@@ -1,4 +1,4 @@
-# deforestation game
+# A Forest Clearing
 **Developer: Apurv Rayate, Hyacinth Weng, Tanvi Mishra |** Based in New York City
 
 **Release Date: 16 May 2022**
