@@ -20,7 +20,6 @@ let axeGif,
   treeCountImg;
 //let gameTime = 0;
 //let gameBegin = false;
-//let gameOver = false;
 let screenMode = 0;
 let gameScreenMode = 4; //screen to go to to begin game
 let instruct = 0;
@@ -198,7 +197,8 @@ function mousePressed() {
   if (
     shared.gameStartChk == true &&
     screenMode == gameScreenMode &&
-    me.state == "player"
+    me.state == "player" && 
+    !shared.gameOver
   ) {
     if (me.setTree === false) {
       //setting main tree initial values
@@ -378,6 +378,9 @@ function draw() {
     }
     me.state == "viewer" ? viewState() : playState(); //deciding which player controls fn to call depending on state
   }
+  if(shared.gameOver == true){
+    endScreen();
+  }
 }
 function viewState() {
   push();
@@ -466,7 +469,7 @@ function drawAllElements() {
       //draw apple selection outline
       for (const a of me.apples) {
         d = dist(mouseX, mouseY, a.x, a.y);
-        if (d <= 8 && !a.isDragged) {
+        if (d <= 8 && !a.isDragged && !shared.gameOver) {
           push();
           noFill();
           stroke(255, 230, 5);
@@ -647,10 +650,9 @@ function gameTimer() {
     });
   });
 
-  if (shared.gameTime >= 60) {
+  if (shared.gameTime >= 30) {
     if (allOfTheChildTrees.length == 0) {
       shared.gameOver = true;
-      screenMode = 5;
     }
   }
   // console.log(gameTime, allOfTheTrees.length);
@@ -671,9 +673,6 @@ function gameState() {
       break;
     case 4:
       gameScreen(); //this reassigns host if the host exists the game. So the game will continue as long as atleast one player is in the room
-      break;
-    case 5:
-      endScreen(); //not implemented
       break;
   }
 }
@@ -888,40 +887,49 @@ function gameScreen() {
   shared.gameStartChk = true; //set to true = game mechanic conditions become true
 }
 function endScreen() {
-  background(red);
+  console.log("end");
+  // background(red);
   push();
+  rectMode(CENTER);
+  fill(255,255,255,200);
+  rect(width/2,height/2-140,700,150,20);
   textAlign(CENTER);
   textSize(40);
-  fill(yellow);
-  text("WHOOP", width / 2, 80);
-  textSize(30);
+  fill(red);
   text(
+    "The forest has been cut down...",
+    width/2,
+    height/2-150
+    );
+    textSize(30);
+  
+    text(
     "You lasted " +
       floor(shared.gameTime / 60) +
       " mins and " +
       floor(shared.gameTime % 60) +
       " secs",
-    width / 2 - 300,
-    130
+    width / 2,
+    height/2-100
   );
-  text("Better luck next time :)", width / 2 - 300, 170);
   pop();
-  for (let i = 0; i < 3; i++) {
-    // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
-    generateNewSentence(
-      w[i],
-      h[i],
-      c[i],
-      cm[i],
-      l[i],
-      a[i],
-      s[i],
-      ls[i],
-      n[i],
-      sh[i],
-      sz[i]
-    );
-  }
+  
+  // for (let i = 0; i < 3; i++) {
+  //   // console.log(w[i], h[i], c[i], cm[i], l[i], a[i], s[i], ls[i], n[i], sh[i]);
+  //   generateNewSentence(
+  //     w[i],
+  //     h[i],
+  //     c[i],
+  //     cm[i],
+  //     l[i],
+  //     a[i],
+  //     s[i],
+  //     ls[i],
+  //     n[i],
+  //     sh[i],
+  //     sz[i]
+  //   );
+  // }
 }
 function nextFn() {
   instruct++;
