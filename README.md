@@ -5,7 +5,7 @@
 
 **Platforms:** PC (Microsoft Windows) / Mac
 
-**Website:** [https://github.com/studio-degen/deforestation](https://github.com/studio-degen/deforestation)
+**Game Link:** [https://studio-degen.github.io/deforestation/](https://studio-degen.github.io/deforestation/)
 
 ## Game Description
 
